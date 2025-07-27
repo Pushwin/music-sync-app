@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Music Sync App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>🎵 Music Sync App</h2>
+
+  <!-- Audio Player -->
+  <audio id="audio" controls>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+
+  <br><br>
+  <!-- Control Buttons -->
+  <button id="play">▶ Play</button>
+  <button id="pause">⏸ Pause</button>
+
+  <!-- Socket.io Script -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
