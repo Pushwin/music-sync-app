@@ -1,18 +1,26 @@
-<div class="container">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Music Sync App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
   <h2>🎵 Music Sync App</h2>
 
-  <button id="adminBtn">Become Admin</button>
-  <p id="adminStatus">No admin yet</p>
+  <p>Song will play in sync on all devices.</p>
 
   <audio id="audio" controls>
     <source src="https://docs.google.com/uc?export=download&id=YOUR_FILE_ID" type="audio/mpeg">
   </audio>
 
-  <div id="adminControls" class="controls" style="display:none;">
+  <div id="controls">
     <button id="playBtn">▶️ Play</button>
     <button id="pauseBtn">⏸ Pause</button>
   </div>
-</div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="script.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,49 +1,34 @@
 const socket = io();
 const audio = document.getElementById("audio");
-const adminBtn = document.getElementById("adminBtn");
-const adminStatus = document.getElementById("adminStatus");
 const playBtn = document.getElementById("playBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 
-let isAdmin = false;
-
-// Try to become admin when button clicked
-adminBtn.onclick = () => {
-  socket.emit("requestAdmin");
+// Play button
+playBtn.onclick = () => {
+  const timestamp = Date.now() + 500; // Play after 0.5 sec
+  socket.emit("playAt", { timestamp, time: audio.currentTime });
+  setTimeout(() => audio.play(), 500);
 };
 
-// Server response about admin status
-socket.on("adminGranted", () => {
-  isAdmin = true;
-  adminBtn.style.display = "none";
-  adminStatus.innerText = "✅ You are Admin";
-  document.getElementById("adminControls").style.display = "block";
-});
+// Pause button
+pauseBtn.onclick = () => {
+  socket.emit("pause");
+  audio.pause();
+};
 
-socket.on("adminDenied", () => {
-  adminStatus.innerText = "❌ Admin already occupied";
-});
-
-// Admin controls
-if (isAdmin) {
-  playBtn.onclick = () => {
-    const timestamp = Date.now() + 500;
-    socket.emit("playAt", { timestamp, time: audio.currentTime });
-    setTimeout(() => audio.play(), 500);
-  };
-
-  pauseBtn.onclick = () => {
-    socket.emit("pause");
-    audio.pause();
-  };
-}
-
-// Listeners: sync playback
+// Sync for listeners
 socket.on("playAt", ({ timestamp, time }) => {
   const delay = timestamp - Date.now();
-  if (delay > 0) {
+
+  // Only adjust if drift > 0.5 sec
+  if (Math.abs(audio.currentTime - time) > 0.5) {
     audio.currentTime = time;
+  }
+
+  if (delay > 0) {
     setTimeout(() => audio.play(), delay);
+  } else {
+    audio.play();
   }
 });
 
