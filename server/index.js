@@ -1,26 +1,33 @@
-const express = require('express');
-const http = require('http');
-const path = require('path');
-const socketIo = require('socket.io');
+let currentAdmin = null;
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-app.use(express.static(path.join(__dirname, '../client')));
+  socket.on("requestAdmin", () => {
+    if (currentAdmin === null) {
+      currentAdmin = socket.id;
+      socket.emit("adminGranted");
+    } else {
+      socket.emit("adminDenied");
+    }
+  });
 
-io.on('connection', (socket) => {
-    console.log('User connected');
+  socket.on("playAt", ({ timestamp, time }) => {
+    if (socket.id === currentAdmin) {
+      socket.broadcast.emit("playAt", { timestamp, time });
+    }
+  });
 
-    socket.on('play', () => socket.broadcast.emit('play'));
-    socket.on('pause', () => socket.broadcast.emit('pause'));
-    socket.on('sync', (time) => socket.broadcast.emit('sync', time));
+  socket.on("pause", () => {
+    if (socket.id === currentAdmin) {
+      socket.broadcast.emit("pause");
+    }
+  });
 
-    // ✅ Broadcast current time every 2 seconds
-    setInterval(() => {
-        io.emit('timeUpdate', Date.now());
-    }, 2000);
+  socket.on("disconnect", () => {
+    if (socket.id === currentAdmin) {
+      currentAdmin = null;
+      console.log("Admin left, role cleared");
+    }
+  });
 });
-
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

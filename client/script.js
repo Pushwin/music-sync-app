@@ -1,36 +1,52 @@
 const socket = io();
-const audio = document.getElementById('audio');
-const playBtn = document.getElementById('play');
-const pauseBtn = document.getElementById('pause');
+const audio = document.getElementById("audio");
+const adminBtn = document.getElementById("adminBtn");
+const adminStatus = document.getElementById("adminStatus");
+const playBtn = document.getElementById("playBtn");
+const pauseBtn = document.getElementById("pauseBtn");
 
-let lastServerTime = 0;
-let lastPing = 0;
+let isAdmin = false;
 
-// When you press Play
-playBtn.onclick = () => {
-    socket.emit('play');
-    socket.emit('sync', audio.currentTime);
-    audio.play();
+// Try to become admin when button clicked
+adminBtn.onclick = () => {
+  socket.emit("requestAdmin");
 };
 
-// When you press Pause
-pauseBtn.onclick = () => {
-    socket.emit('pause');
+// Server response about admin status
+socket.on("adminGranted", () => {
+  isAdmin = true;
+  adminBtn.style.display = "none";
+  adminStatus.innerText = "✅ You are Admin";
+  document.getElementById("adminControls").style.display = "block";
+});
+
+socket.on("adminDenied", () => {
+  adminStatus.innerText = "❌ Admin already occupied";
+});
+
+// Admin controls
+if (isAdmin) {
+  playBtn.onclick = () => {
+    const timestamp = Date.now() + 500;
+    socket.emit("playAt", { timestamp, time: audio.currentTime });
+    setTimeout(() => audio.play(), 500);
+  };
+
+  pauseBtn.onclick = () => {
+    socket.emit("pause");
     audio.pause();
-};
+  };
+}
 
-// Sync when server tells
-socket.on('play', () => audio.play());
-socket.on('pause', () => audio.pause());
-socket.on('sync', (time) => { audio.currentTime = time; });
+// Listeners: sync playback
+socket.on("playAt", ({ timestamp, time }) => {
+  const delay = timestamp - Date.now();
+  if (delay > 0) {
+    audio.currentTime = time;
+    setTimeout(() => audio.play(), delay);
+  }
+});
 
-// ✅ Drift correction: Server sends time every 2s
-socket.on('timeUpdate', (serverTime) => {
-    const now = Date.now();
-    const latency = (now - serverTime) / 1000; // in seconds
-    const expectedTime = audio.currentTime + latency;
-
-    if (Math.abs(audio.currentTime - expectedTime) > 0.2) {
-        audio.currentTime = expectedTime; // Adjust drift
-    }
+socket.on("pause", () => {
+  audio.pause();
 });
