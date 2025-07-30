@@ -4,19 +4,18 @@ const playBtn = document.getElementById("playBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 
 let timeOffset = 0;
-let lastPlayServerTime = null;
-let baseAudioTime = null;
 
 // Clock sync
 function syncClocks() {
   const start = performance.now();
   socket.emit("pingTime");
+
   socket.once("pongTime", (serverTime) => {
     const end = performance.now();
     const roundTrip = end - start;
     const estimatedServerTime = serverTime + roundTrip / 2;
     timeOffset = estimatedServerTime - end;
-    console.log("🕒 Time offset:", timeOffset.toFixed(2), "ms");
+    console.log("🕒 Time offset synced:", timeOffset.toFixed(2), "ms");
   });
 }
 setInterval(syncClocks, 10000);
@@ -26,10 +25,7 @@ syncClocks();
 playBtn.onclick = () => {
   const localNow = performance.now();
   const serverNow = localNow + timeOffset;
-  const playAtServerTime = serverNow + 2000; // 2s later
-
-  lastPlayServerTime = playAtServerTime;
-  baseAudioTime = audio.currentTime;
+  const playAtServerTime = serverNow + 2000;
 
   socket.emit("playAt", {
     serverTimestamp: playAtServerTime,
@@ -39,7 +35,7 @@ playBtn.onclick = () => {
   const localPlayTime = playAtServerTime - timeOffset;
   const delay = localPlayTime - performance.now();
   if (delay > 0) {
-    setTimeout(() => audio.play().catch(() => {}), delay);
+    setTimeout(() => audio.play(), delay);
   } else {
     audio.play();
   }
@@ -51,25 +47,8 @@ pauseBtn.onclick = () => {
   audio.pause();
 };
 
-// Resync during playback every 2s
-setInterval(() => {
-  if (!audio.paused && lastPlayServerTime !== null) {
-    const serverNow = performance.now() + timeOffset;
-    const expected = (serverNow - lastPlayServerTime) / 1000 + baseAudioTime;
-    const drift = audio.currentTime - expected;
-
-    if (Math.abs(drift) > 0.15) {
-      console.log("🔧 Auto-correcting drift of", drift.toFixed(3), "sec");
-      audio.currentTime = expected;
-    }
-  }
-}, 2000);
-
-// Receive play from server
+// Play on other devices
 socket.on("playAt", ({ serverTimestamp, audioTime }) => {
-  lastPlayServerTime = serverTimestamp;
-  baseAudioTime = audioTime;
-
   const localPlayTime = serverTimestamp - timeOffset;
   const delay = localPlayTime - performance.now();
 
@@ -78,7 +57,7 @@ socket.on("playAt", ({ serverTimestamp, audioTime }) => {
   }
 
   if (delay > 0) {
-    setTimeout(() => audio.play().catch(() => {}), delay);
+    setTimeout(() => audio.play(), delay);
   } else {
     audio.play();
   }

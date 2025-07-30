@@ -17,14 +17,17 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // Time sync
   socket.on("pingTime", () => {
     socket.emit("pongTime", Date.now());
   });
 
+  // Play signal
   socket.on("playAt", ({ serverTimestamp, audioTime }) => {
     socket.broadcast.emit("playAt", { serverTimestamp, audioTime });
   });
 
+  // Pause signal
   socket.on("pause", () => {
     socket.broadcast.emit("pause");
   });
