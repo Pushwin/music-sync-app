@@ -11,41 +11,24 @@ const io = new Server(server);
 const clientPath = path.join(__dirname, "../client");
 app.use(express.static(clientPath));
 
-let adminId = null;
+app.get("/", (req, res) => {
+  res.sendFile(path.join(clientPath, "index.html"));
+});
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("join", () => {
-    if (!adminId) {
-      adminId = socket.id;
-      socket.emit("youAreAdmin");
-      console.log("👑 Assigned admin:", socket.id);
-    }
-  });
-
-  socket.on("pingTime", (clientStart) => {
+  socket.on("pingTime", (clientSent) => {
     const serverNow = performance.now();
-    socket.emit("pongTime", serverNow, clientStart);
+    socket.emit("pongTime", serverNow, clientSent);
   });
 
   socket.on("playAt", ({ serverTimestamp, offsetTime }) => {
-    if (socket.id === adminId) {
-      socket.broadcast.emit("playAt", { serverTimestamp, offsetTime });
-    }
+    socket.broadcast.emit("playAt", { serverTimestamp, offsetTime });
   });
 
   socket.on("pause", () => {
-    if (socket.id === adminId) {
-      socket.broadcast.emit("pause");
-    }
-  });
-
-  socket.on("disconnect", () => {
-    if (socket.id === adminId) {
-      console.log("👋 Admin disconnected");
-      adminId = null;
-    }
+    socket.broadcast.emit("pause");
   });
 });
 
