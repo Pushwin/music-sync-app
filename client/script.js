@@ -21,6 +21,22 @@ function syncClocks() {
 setInterval(syncClocks, 10000);
 syncClocks();
 
+// Accurate playback function
+function playAtPreciseTime(targetTime, expectedAudioTime) {
+  function loop() {
+    const now = performance.now();
+    if (Math.abs(audio.currentTime - expectedAudioTime) > 0.05) {
+      audio.currentTime = expectedAudioTime;
+    }
+    if (now >= targetTime - 30) { // 30ms early buffer
+      audio.play();
+    } else {
+      requestAnimationFrame(loop);
+    }
+  }
+  loop();
+}
+
 // Play button
 playBtn.onclick = () => {
   const localNow = performance.now();
@@ -33,12 +49,7 @@ playBtn.onclick = () => {
   });
 
   const localPlayTime = playAtServerTime - timeOffset;
-  const delay = localPlayTime - performance.now();
-  if (delay > 0) {
-    setTimeout(() => audio.play(), delay);
-  } else {
-    audio.play();
-  }
+  playAtPreciseTime(localPlayTime, audio.currentTime);
 };
 
 // Pause button
@@ -50,17 +61,7 @@ pauseBtn.onclick = () => {
 // Play on other devices
 socket.on("playAt", ({ serverTimestamp, audioTime }) => {
   const localPlayTime = serverTimestamp - timeOffset;
-  const delay = localPlayTime - performance.now();
-
-  if (Math.abs(audio.currentTime - audioTime) > 0.2) {
-    audio.currentTime = audioTime;
-  }
-
-  if (delay > 0) {
-    setTimeout(() => audio.play(), delay);
-  } else {
-    audio.play();
-  }
+  playAtPreciseTime(localPlayTime, audioTime);
 });
 
 // Pause sync
