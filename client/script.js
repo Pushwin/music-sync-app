@@ -5,36 +5,36 @@ const pauseBtn = document.getElementById("pauseBtn");
 
 let timeOffset = 0;
 
-// Clock sync
+// Sync clock with server
 function syncClocks() {
   const start = performance.now();
-  socket.emit("pingTime");
+  socket.emit("pingTime", start);
 
-  socket.once("pongTime", (serverTime) => {
+  socket.once("pongTime", (serverTime, clientStart) => {
     const end = performance.now();
-    const roundTrip = end - start;
-    const estimatedServerTime = serverTime + roundTrip / 2;
-    timeOffset = estimatedServerTime - end;
-    console.log("🕒 Time offset synced:", timeOffset.toFixed(2), "ms");
+    const roundTrip = end - clientStart;
+    const estimatedServerNow = serverTime + roundTrip / 2;
+    timeOffset = estimatedServerNow - end;
+    console.log("🕒 Time offset:", timeOffset.toFixed(2), "ms");
   });
 }
-setInterval(syncClocks, 10000);
 syncClocks();
+setInterval(syncClocks, 10000);
 
-// Accurate playback function
-function playAtPreciseTime(targetTime, expectedAudioTime) {
-  function loop() {
+// Accurate play
+function playAt(targetTime, expectedAudioTime) {
+  function check() {
     const now = performance.now();
-    if (Math.abs(audio.currentTime - expectedAudioTime) > 0.05) {
+    if (Math.abs(audio.currentTime - expectedAudioTime) > 0.03) {
       audio.currentTime = expectedAudioTime;
     }
-    if (now >= targetTime - 30) { // 30ms early buffer
+    if (now >= targetTime - 20) {
       audio.play();
     } else {
-      requestAnimationFrame(loop);
+      requestAnimationFrame(check);
     }
   }
-  loop();
+  check();
 }
 
 // Play button
@@ -45,11 +45,11 @@ playBtn.onclick = () => {
 
   socket.emit("playAt", {
     serverTimestamp: playAtServerTime,
-    audioTime: audio.currentTime,
+    audioTime: audio.currentTime
   });
 
   const localPlayTime = playAtServerTime - timeOffset;
-  playAtPreciseTime(localPlayTime, audio.currentTime);
+  playAt(localPlayTime, audio.currentTime);
 };
 
 // Pause button
@@ -58,13 +58,13 @@ pauseBtn.onclick = () => {
   audio.pause();
 };
 
-// Play on other devices
+// Remote play
 socket.on("playAt", ({ serverTimestamp, audioTime }) => {
   const localPlayTime = serverTimestamp - timeOffset;
-  playAtPreciseTime(localPlayTime, audioTime);
+  playAt(localPlayTime, audioTime);
 });
 
-// Pause sync
+// Remote pause
 socket.on("pause", () => {
   audio.pause();
 });

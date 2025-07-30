@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { performance } = require("perf_hooks");
 const path = require("path");
 
 const app = express();
@@ -17,8 +18,9 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("pingTime", () => {
-    socket.emit("pongTime", Date.now());
+  socket.on("pingTime", (clientStart) => {
+    const serverNow = performance.now();
+    socket.emit("pongTime", serverNow, clientStart);
   });
 
   socket.on("playAt", ({ serverTimestamp, audioTime }) => {
