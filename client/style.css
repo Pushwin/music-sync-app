@@ -22,10 +22,43 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url('https://i.imgur.com/lP5Z5CZ.png'); /* music symbol pattern */
+  background-image: url('https://i.imgur.com/lP5Z5CZ.png');
   background-repeat: repeat;
   opacity: 0.02;
   z-index: 0;
+}
+
+.floating-notes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-notes span {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.4;
+  animation: floatUp 6s linear infinite;
+  color: white;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) scale(1);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-20vh) scale(1.5);
+    opacity: 0;
+  }
 }
 
 .content {
@@ -44,9 +77,18 @@ h1 {
 
 .subtitle {
   font-size: 1.1rem;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   font-style: italic;
   color: #ddd;
+}
+
+.now-playing {
+  font-size: 1rem;
+  background: #ffffff10;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00000030;
 }
 
 #audio {
@@ -62,7 +104,7 @@ h1 {
   margin: 10px;
   border: none;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
   background: linear-gradient(to right, #ff512f, #dd2476);
@@ -72,8 +114,29 @@ h1 {
 }
 
 #controls button:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
   box-shadow: 0 0 20px #ffffff70;
+}
+
+#volumeSlider {
+  width: 150px;
+  margin-top: 10px;
+  accent-color: #ff5c8a;
+}
+
+.disc-container {
+  margin-top: 30px;
+}
+
+.disc {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(#222 30%, #555 40%, #111 100%);
+  border: 4px solid #ff5c8a;
+  animation: spin 5s linear infinite;
+  margin: 0 auto;
+  box-shadow: 0 0 20px #ff5c8a50;
 }
 
 .caption {
@@ -82,6 +145,11 @@ h1 {
   color: #eee;
   opacity: 0.8;
   font-style: italic;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes bgAnimation {

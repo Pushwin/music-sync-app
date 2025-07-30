@@ -3,22 +3,31 @@ const socket = io();
 const playBtn = document.getElementById("playBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const audio = document.getElementById("audio");
+const volumeSlider = document.getElementById("volumeSlider");
+
 audio.src = "https://media.vocaroo.com/mp3/13vvld8kQ12W";
+audio.volume = volumeSlider.value;
 
 let isAdmin = false;
 let timeOffset = 0;
 
+// Hide buttons until admin is confirmed
 playBtn.style.display = "none";
 pauseBtn.style.display = "none";
 
-// Receive admin rights
+// 🔊 Volume control
+volumeSlider.oninput = (e) => {
+  audio.volume = e.target.value;
+};
+
+// 👑 Admin setup
 socket.on("youAreAdmin", () => {
   isAdmin = true;
   playBtn.style.display = "inline-block";
   pauseBtn.style.display = "inline-block";
 });
 
-// Sync clock
+// 🕒 Sync clocks
 function syncClocks() {
   const start = performance.now();
   socket.emit("pingTime", start);
@@ -33,7 +42,7 @@ function syncClocks() {
 syncClocks();
 setInterval(syncClocks, 10000);
 
-// Sync play
+// 🎶 Play scheduling
 function schedulePlayback(serverTime, audioTime = 0) {
   const localPlayTime = serverTime - timeOffset;
   const delay = localPlayTime - performance.now();
@@ -49,7 +58,7 @@ function schedulePlayback(serverTime, audioTime = 0) {
   }
 }
 
-// Play
+// ▶️ Play button
 playBtn.onclick = () => {
   if (!isAdmin) return;
   const localNow = performance.now();
@@ -64,14 +73,14 @@ playBtn.onclick = () => {
   schedulePlayback(playAtServer, audio.currentTime);
 };
 
-// Pause
+// ⏸ Pause button
 pauseBtn.onclick = () => {
   if (!isAdmin) return;
   socket.emit("pause");
   audio.pause();
 };
 
-// Listeners
+// ⏯ Listen to events
 socket.on("playAt", ({ serverTimestamp, audioTime }) => {
   schedulePlayback(serverTimestamp, audioTime);
 });

@@ -8,18 +8,42 @@
 </head>
 <body>
   <div class="bg-music"></div>
+
+  <!-- Fullscreen floating music notes -->
+  <div class="floating-notes">
+    <span style="left: 5%; animation-delay: 0s;">🎵</span>
+    <span style="left: 15%; animation-delay: 1s;">🎶</span>
+    <span style="left: 25%; animation-delay: 2s;">🎼</span>
+    <span style="left: 35%; animation-delay: 3s;">🎧</span>
+    <span style="left: 45%; animation-delay: 4s;">🎵</span>
+    <span style="left: 55%; animation-delay: 5s;">🎶</span>
+    <span style="left: 65%; animation-delay: 2s;">🎼</span>
+    <span style="left: 75%; animation-delay: 3s;">🎧</span>
+    <span style="left: 85%; animation-delay: 4s;">🎵</span>
+    <span style="left: 95%; animation-delay: 5s;">🎶</span>
+  </div>
+
   <div class="content">
     <h1>🎶 Harmony Sync</h1>
-    <p class="subtitle">Listen together. Feel together. Perfectly synced music across the world 🌍</p>
+    <p class="subtitle">Listen together. Feel together. Synced from heart to heart 💓</p>
+
+    <div class="now-playing">
+      Now Playing: <marquee behavior="scroll" direction="left" scrollamount="5">Lo-Fi Vibes 🎧 Chill with Friends 🎵</marquee>
+    </div>
 
     <audio id="audio" controls></audio>
 
     <div id="controls">
-      <button id="playBtn">▶️ Start the Beat</button>
-      <button id="pauseBtn">⏸ Pause the Vibe</button>
+      <button id="playBtn" title="Start the Beat">▶️</button>
+      <button id="pauseBtn" title="Pause the Vibe">⏸</button>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" title="Volume" />
     </div>
 
-    <p class="caption">👑 Only the admin controls playback. Everyone else just vibes in perfect sync.</p>
+    <div class="disc-container">
+      <div class="disc"></div>
+    </div>
+
+    <p class="caption">👑 Only the admin controls the playback. Everyone else just vibes 😌</p>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
