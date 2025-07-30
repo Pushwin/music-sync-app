@@ -2,21 +2,24 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Music Sync App</title>
+  <title>🎵 Harmony Sync</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>🎵 Music Sync App</h2>
-  <p>Song will play in sync on all devices.</p>
+  <div class="bg-music"></div>
+  <div class="content">
+    <h1>🎶 Harmony Sync</h1>
+    <p class="subtitle">Listen together. Feel together. Perfectly synced music across the world 🌍</p>
 
-  <audio id="audio" controls>
-    <source src="https://media.vocaroo.com/mp3/13vvld8kQ12W" type="audio/mpeg">
-  </audio>
+    <audio id="audio" controls></audio>
 
-  <div id="controls">
-    <button id="playBtn">▶️ Play</button>
-    <button id="pauseBtn">⏸ Pause</button>
+    <div id="controls">
+      <button id="playBtn">▶️ Start the Beat</button>
+      <button id="pauseBtn">⏸ Pause the Vibe</button>
+    </div>
+
+    <p class="caption">👑 Only the admin controls playback. Everyone else just vibes in perfect sync.</p>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
