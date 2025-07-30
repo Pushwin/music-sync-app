@@ -18,13 +18,13 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("pingTime", (clientStart) => {
+  socket.on("pingTime", (clientSent) => {
     const serverNow = performance.now();
-    socket.emit("pongTime", serverNow, clientStart);
+    socket.emit("pongTime", serverNow, clientSent);
   });
 
-  socket.on("playAt", ({ serverTimestamp, audioTime }) => {
-    socket.broadcast.emit("playAt", { serverTimestamp, audioTime });
+  socket.on("playAt", ({ serverTimestamp, offsetTime }) => {
+    socket.broadcast.emit("playAt", { serverTimestamp, offsetTime });
   });
 
   socket.on("pause", () => {
