@@ -1,7 +1,6 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { performance } = require("perf_hooks");
 const path = require("path");
 
 const app = express();
@@ -18,15 +17,17 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("pingTime", (clientSent) => {
-    const serverNow = performance.now();
-    socket.emit("pongTime", serverNow, clientSent);
+  // Time sync
+  socket.on("pingTime", () => {
+    socket.emit("pongTime", Date.now());
   });
 
-  socket.on("playAt", ({ serverTimestamp, offsetTime }) => {
-    socket.broadcast.emit("playAt", { serverTimestamp, offsetTime });
+  // Play signal
+  socket.on("playAt", ({ serverTimestamp, audioTime }) => {
+    socket.broadcast.emit("playAt", { serverTimestamp, audioTime });
   });
 
+  // Pause signal
   socket.on("pause", () => {
     socket.broadcast.emit("pause");
   });
@@ -36,3 +37,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+
