@@ -721,6 +721,12 @@
       statusText.innerHTML = "🎛️ You have admin controls! Search, upload, and play music for everyone 🎵";
     });
 
+    // Non-admin setup
+    socket.on("youAreNotAdmin", () => {
+      isAdmin = false;
+      statusText.innerHTML = "👑 Only the admin controls the playback. Everyone else just vibes 😌";
+    });
+
     // Enhanced clock synchronization with quality monitoring
     function syncClocks() {
       const start = performance.now();
@@ -893,12 +899,16 @@
     }
 
     function selectSong(song) {
+      if (!isAdmin) return; // Only admin can select songs
+      
       currentSong = song;
       audio.src = song.url;
       songTitle.textContent = song.title;
       songArtist.textContent = song.artist;
       searchResults.style.display = 'none';
       searchInput.value = '';
+      
+      console.log("Admin selected song:", song.title, "URL:", song.url);
       
       // Notify all clients about the song change
       socket.emit('songChange', {
@@ -962,15 +972,30 @@
     socket.on("songChange", ({ title, artist, url }) => {
       songTitle.textContent = title;
       songArtist.textContent = artist;
-      if (!isAdmin) {
+      // Update audio source for ALL users (admin and non-admin)
+      if (url && audio.src !== window.location.origin + url) {
         audio.src = url;
+        currentSong = { title, artist, url };
+        console.log("Song changed to:", title, "by", artist, "URL:", url);
       }
     });
 
     // Listen for songs database updates
     socket.on("songsUpdated", (newSongsDatabase) => {
       songsDatabase = newSongsDatabase;
-      console.log('Songs database updated:', songsDatabase.length, 'songs');
+      console.log('Songs database updated for', isAdmin ? 'ADMIN' : 'USER', ':', songsDatabase.length, 'songs');
+      
+      // Initialize with a default song if this is the first load and no current song
+      if (songsDatabase.length > 0 && !currentSong) {
+        const defaultSong = songsDatabase[0];
+        // Don't auto-load for non-admin users, wait for admin to select
+        if (isAdmin) {
+          audio.src = defaultSong.url;
+          songTitle.textContent = defaultSong.title;
+          songArtist.textContent = defaultSong.artist;
+          currentSong = defaultSong;
+        }
+      }
       
       // Refresh search results if search is active
       if (searchContainer.style.display !== 'none' && searchInput.value.length > 1) {
@@ -998,25 +1023,8 @@
       statusText.textContent = '⚠️ Error loading audio file';
     });
 
-    // Load initial songs database
-    fetch('/api/songs')
-      .then(response => response.json())
-      .then(songs => {
-        songsDatabase = songs;
-        console.log('Initial songs loaded:', songsDatabase.length, 'songs');
-        
-        // Initialize with a default song if available
-        if (songsDatabase.length > 0) {
-          const defaultSong = songsDatabase[0];
-          audio.src = defaultSong.url;
-          songTitle.textContent = defaultSong.title;
-          songArtist.textContent = defaultSong.artist;
-          currentSong = defaultSong;
-        }
-      })
-      .catch(error => {
-        console.error('Error loading songs:', error);
-      });
+    // Remove the initial songs loading since it's now handled by socket
+    // The server will send songsUpdated event on connection
 
     // Keyboard shortcuts for admin
     document.addEventListener('keydown', (e) => {

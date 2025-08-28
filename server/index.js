@@ -175,16 +175,20 @@ const getHighPrecisionTime = () => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // Send current songs database to ALL new connections
+  socket.emit("songsUpdated", songsDatabase);
+  socket.emit("songChange", currentSong);
+
   // Assign admin if none exists
   if (!adminId) {
     adminId = socket.id;
     socket.emit("youAreAdmin");
     console.log("👑 Admin assigned to", socket.id);
+  } else {
+    // Let non-admin users know they're not admin
+    socket.emit("youAreNotAdmin");
+    console.log("👤 Regular user connected:", socket.id);
   }
-
-  // Send current songs database to new connections
-  socket.emit("songsUpdated", songsDatabase);
-  socket.emit("songChange", currentSong);
 
   // High-precision time synchronization
   socket.on("pingTime", (clientStart) => {
