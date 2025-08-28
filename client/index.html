@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>🎵 Harmony Sync</title>
+  <title>🎵 Harmony Sync - Zero Delay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
@@ -31,71 +31,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    .particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      animation: float 20s infinite linear;
-    }
-
-    @keyframes float {
-      0% {
-        transform: translateY(100vh) scale(0);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-      }
-      90% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-10vh) scale(1);
-        opacity: 0;
-      }
-    }
-
-    .floating-notes {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-      overflow: hidden;
-    }
-
-    .floating-notes span {
-      position: absolute;
-      font-size: 2rem;
-      opacity: 0.2;
-      animation: floatUp 8s linear infinite;
-      color: #ff6b6b;
-    }
-
-    @keyframes floatUp {
-      0% {
-        transform: translateY(100vh) rotate(0deg);
-        opacity: 0;
-      }
-      50% {
-        opacity: 0.3;
-      }
-      100% {
-        transform: translateY(-20vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
     .container {
       z-index: 2;
       text-align: center;
@@ -107,8 +42,6 @@
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      max-height: 90vh;
-      overflow-y: auto;
     }
 
     h1 {
@@ -135,7 +68,6 @@
       margin-bottom: 30px;
       border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .song-title {
@@ -150,193 +82,11 @@
       color: #b0b0b0;
     }
 
-    /* Upload Section */
-    .upload-section {
-      margin-bottom: 25px;
-      display: none;
-      background: rgba(78, 205, 196, 0.1);
-      padding: 20px;
-      border-radius: 15px;
-      border: 1px solid rgba(78, 205, 196, 0.3);
-    }
-
-    .upload-section.admin {
-      display: block;
-    }
-
-    .upload-title {
-      color: #4ecdc4;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 15px;
-    }
-
-    .upload-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .form-row input {
-      flex: 1;
-    }
-
-    .upload-input, .text-input {
-      padding: 12px 15px;
-      border: none;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 0.9rem;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .upload-input::file-selector-button {
-      background: linear-gradient(135deg, #4ecdc4, #44a08d);
-      border: none;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-
-    .text-input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .upload-btn {
-      background: linear-gradient(135deg, #4ecdc4, #44a08d);
-      border: none;
-      color: white;
-      padding: 12px 25px;
-      border-radius: 15px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .upload-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
-    }
-
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .search-container {
-      margin-bottom: 25px;
-      display: none;
-    }
-
-    .search-container.admin {
-      display: block;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 15px 20px;
-      border: none;
-      border-radius: 25px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 1rem;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      margin-bottom: 15px;
-    }
-
-    .search-input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .search-results {
-      max-height: 200px;
-      overflow-y: auto;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .search-result {
-      padding: 15px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .search-result:hover {
-      background: rgba(255, 107, 107, 0.2);
-    }
-
-    .search-result:last-child {
-      border-bottom: none;
-    }
-
-    .result-info {
-      flex: 1;
-      text-align: left;
-    }
-
-    .result-title {
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .result-artist {
-      font-size: 0.9rem;
-      color: #b0b0b0;
-    }
-
-    .result-duration {
-      font-size: 0.8rem;
-      color: #888;
-    }
-
-    .song-type-badge {
-      background: rgba(78, 205, 196, 0.3);
-      color: #4ecdc4;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.7rem;
-      margin-left: 10px;
-    }
-
-    .delete-btn {
-      background: rgba(255, 107, 107, 0.3);
-      color: #ff6b6b;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      margin-left: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .delete-btn:hover {
-      background: rgba(255, 107, 107, 0.5);
-    }
-
     audio {
       width: 100%;
       margin-bottom: 25px;
       border-radius: 15px;
       background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(10px);
     }
 
     .controls {
@@ -359,7 +109,6 @@
       color: white;
       box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
       transition: all 0.3s ease;
-      border: 2px solid transparent;
     }
 
     .control-btn:hover {
@@ -367,23 +116,10 @@
       box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
     }
 
-    .control-btn:active {
-      transform: translateY(0);
-    }
-
     .control-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
-    }
-
-    .search-btn, .upload-toggle-btn {
-      background: linear-gradient(135deg, #4ecdc4, #44a08d);
-      box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
-    }
-
-    .search-btn:hover, .upload-toggle-btn:hover {
-      box-shadow: 0 15px 35px rgba(78, 205, 196, 0.4);
     }
 
     .volume-container {
@@ -463,17 +199,6 @@
       margin-top: 20px;
     }
 
-    .admin-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #ffd700, #ffed4e);
-      color: #000;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
     .sync-status {
       position: fixed;
       top: 20px;
@@ -483,41 +208,34 @@
       border-radius: 20px;
       font-size: 0.8rem;
       backdrop-filter: blur(10px);
+      z-index: 1000;
     }
 
+    .sync-excellent { color: #00ff88; }
     .sync-good { color: #4ecdc4; }
     .sync-poor { color: #ff6b6b; }
 
-    .notification {
+    .latency-info {
       position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(78, 205, 196, 0.9);
-      color: white;
-      padding: 15px 25px;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
       border-radius: 15px;
-      font-weight: 600;
+      font-size: 0.7rem;
+      backdrop-filter: blur(10px);
       z-index: 1000;
-      display: none;
-      animation: slideDown 0.3s ease;
     }
 
-    .notification.error {
-      background: rgba(255, 107, 107, 0.9);
-    }
-
-    .notification.show {
-      display: block;
-    }
-
-    @keyframes slideDown {
-      from {
-        transform: translateX(-50%) translateY(-100%);
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-      }
+    .admin-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #000;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 600px) {
@@ -538,90 +256,43 @@
         padding: 12px 20px;
         font-size: 1rem;
       }
-
-      .form-row {
-        flex-direction: column;
-      }
     }
   </style>
 </head>
 <body>
-  <!-- Animated particles -->
-  <div class="particles" id="particles"></div>
-
-  <!-- Floating musical notes -->
-  <div class="floating-notes">
-    <span style="left: 5%; animation-delay: 0s;">🎵</span>
-    <span style="left: 15%; animation-delay: 1s;">🎶</span>
-    <span style="left: 25%; animation-delay: 2s;">🎼</span>
-    <span style="left: 35%; animation-delay: 3s;">🎧</span>
-    <span style="left: 45%; animation-delay: 4s;">🎵</span>
-    <span style="left: 55%; animation-delay: 5s;">🎶</span>
-    <span style="left: 65%; animation-delay: 2s;">🎼</span>
-    <span style="left: 75%; animation-delay: 3s;">🎧</span>
-    <span style="left: 85%; animation-delay: 4s;">🎵</span>
-    <span style="left: 95%; animation-delay: 5s;">🎶</span>
-  </div>
-
   <!-- Sync status indicator -->
   <div class="sync-status">
-    <span id="syncStatus" class="sync-good">● Synced</span>
+    <span id="syncStatus" class="sync-good">● Syncing...</span>
   </div>
 
-  <!-- Notification -->
-  <div id="notification" class="notification"></div>
+  <!-- Latency info -->
+  <div class="latency-info">
+    <div>RTT: <span id="rttDisplay">--</span>ms</div>
+    <div>Offset: <span id="offsetDisplay">--</span>ms</div>
+    <div>Jitter: <span id="jitterDisplay">--</span>ms</div>
+  </div>
 
   <div class="container">
     <div id="adminBadge" class="admin-badge" style="display: none;">
-      👑 ADMIN CONTROLS
+      👑 ADMIN CONTROLS - ULTRA LOW LATENCY MODE
     </div>
 
-    <h1>🎶 Harmony Sync</h1>
-    <p class="subtitle">Listen together. Feel together. Synced from heart to heart 💕</p>
-
-    <!-- Upload Section (Admin Only) -->
-    <div id="uploadSection" class="upload-section">
-      <div class="upload-title">📁 Upload Your Music</div>
-      <form id="uploadForm" class="upload-form">
-        <input type="file" id="songFile" class="upload-input" accept="audio/*" required>
-        <div class="form-row">
-          <input type="text" id="songTitleInput" class="text-input" placeholder="Song Title (optional)">
-          <input type="text" id="songArtistInput" class="text-input" placeholder="Artist (optional)">
-        </div>
-        <button type="submit" id="uploadBtn" class="upload-btn">🎵 Upload Song</button>
-      </form>
-    </div>
-
-    <!-- Song Search (Admin Only) -->
-    <div id="searchContainer" class="search-container">
-      <input 
-        type="text" 
-        id="searchInput" 
-        class="search-input" 
-        placeholder="🔍 Search for any song..." 
-      />
-      <div id="searchResults" class="search-results"></div>
-    </div>
+    <h1>⚡ Harmony Sync</h1>
+    <p class="subtitle">Zero-Delay Synchronized Music Experience</p>
 
     <!-- Now Playing -->
     <div class="now-playing">
-      <div class="song-title" id="songTitle">No song selected</div>
-      <div class="song-artist" id="songArtist">Choose a song to get started</div>
+      <div class="song-title" id="songTitle">Ultra Low Latency Test Track</div>
+      <div class="song-artist" id="songArtist">Precision Audio Labs</div>
     </div>
 
     <!-- Audio Player -->
-    <audio id="audio" controls></audio>
+    <audio id="audio" controls preload="auto"></audio>
 
     <!-- Controls -->
     <div class="controls">
-      <button id="uploadToggleBtn" class="control-btn upload-toggle-btn" style="display: none;">
-        📁 Upload
-      </button>
-      <button id="searchBtn" class="control-btn search-btn" style="display: none;">
-        🔍 Find Song
-      </button>
       <button id="playBtn" class="control-btn" style="display: none;">
-        ▶️ Play
+        ⚡ Instant Play
       </button>
       <button id="pauseBtn" class="control-btn" style="display: none;">
         ⏸️ Pause
@@ -640,67 +311,201 @@
     </div>
 
     <p class="status" id="statusText">
-      👑 Only the admin controls the playback. Everyone else just vibes 😌
+      ⚡ Ultra low latency mode active. Target: &lt;10ms sync precision
     </p>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script>
-    // Initialize particles
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      for (let i = 0; i < 50; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 20 + 's';
-        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-        particlesContainer.appendChild(particle);
-      }
-    }
-    createParticles();
+    // Ultra low latency configuration
+    const socket = io({
+      transports: ['websocket'], // Force WebSocket for lowest latency
+      upgrade: false,
+      pingTimeout: 5000,
+      pingInterval: 2000
+    });
 
-    // Socket and audio setup
-    const socket = io();
+    // DOM elements
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
-    const searchBtn = document.getElementById("searchBtn");
-    const uploadToggleBtn = document.getElementById("uploadToggleBtn");
     const audio = document.getElementById("audio");
     const volumeSlider = document.getElementById("volumeSlider");
-    const searchInput = document.getElementById("searchInput");
-    const searchResults = document.getElementById("searchResults");
-    const searchContainer = document.getElementById("searchContainer");
-    const uploadSection = document.getElementById("uploadSection");
-    const uploadForm = document.getElementById("uploadForm");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const songFile = document.getElementById("songFile");
-    const songTitleInput = document.getElementById("songTitleInput");
-    const songArtistInput = document.getElementById("songArtistInput");
-    const adminBadge = document.getElementById("adminBadge");
-    const songTitle = document.getElementById("songTitle");
-    const songArtist = document.getElementById("songArtist");
     const disc = document.getElementById("disc");
     const statusText = document.getElementById("statusText");
     const syncStatus = document.getElementById("syncStatus");
-    const notification = document.getElementById("notification");
+    const adminBadge = document.getElementById("adminBadge");
+    const rttDisplay = document.getElementById("rttDisplay");
+    const offsetDisplay = document.getElementById("offsetDisplay");
+    const jitterDisplay = document.getElementById("jitterDisplay");
 
+    // Ultra low latency variables
     let isAdmin = false;
     let timeOffset = 0;
-    let syncQuality = 'good';
-    let currentSong = null;
-    let songsDatabase = [];
+    let avgRTT = 0;
+    let jitter = 0;
+    let syncQuality = 'syncing';
+    let rttHistory = [];
+    let offsetHistory = [];
 
-    // Audio setup
+    // Set test audio (replace with your audio URL)
+    audio.src = "https://media.vocaroo.com/mp3/13vvld8kQ12W";
     audio.volume = volumeSlider.value;
+    audio.preload = "auto";
 
-    // Notification system
-    function showNotification(message, isError = false) {
-      notification.textContent = message;
-      notification.className = `notification ${isError ? 'error' : ''} show`;
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
+    // Ultra-precise timing functions
+    const getHighPrecisionTime = () => {
+      return performance.now() + (performance.timeOrigin % 1);
+    };
+
+    const sleep = (ms) => {
+      return new Promise(resolve => {
+        if (ms <= 0) {
+          resolve();
+          return;
+        }
+        
+        // Use requestAnimationFrame for sub-millisecond precision
+        if (ms < 16) {
+          const start = performance.now();
+          const frame = () => {
+            if (performance.now() - start >= ms) {
+              resolve();
+            } else {
+              requestAnimationFrame(frame);
+            }
+          };
+          requestAnimationFrame(frame);
+        } else {
+          setTimeout(resolve, ms);
+        }
+      });
+    };
+
+    // Enhanced clock synchronization with multiple samples
+    async function performPrecisionSync() {
+      const samples = [];
+      const SAMPLE_COUNT = 10;
+      
+      for (let i = 0; i < SAMPLE_COUNT; i++) {
+        const start = getHighPrecisionTime();
+        
+        const response = await new Promise(resolve => {
+          socket.emit("ultraPingTime", start);
+          socket.once("ultraPongTime", (serverNow, clientStart) => {
+            const end = getHighPrecisionTime();
+            resolve({ serverNow, clientStart, end });
+          });
+        });
+        
+        const rtt = response.end - response.clientStart;
+        const serverTimeAtReceive = response.serverNow + (rtt / 2);
+        const offset = serverTimeAtReceive - response.end;
+        
+        samples.push({ rtt, offset });
+        
+        // Small delay between samples to avoid overwhelming
+        if (i < SAMPLE_COUNT - 1) {
+          await sleep(5);
+        }
+      }
+      
+      // Calculate statistics
+      const rtts = samples.map(s => s.rtt);
+      const offsets = samples.map(s => s.offset);
+      
+      // Use median for better accuracy (less affected by outliers)
+      rtts.sort((a, b) => a - b);
+      offsets.sort((a, b) => a - b);
+      
+      const medianRTT = rtts[Math.floor(rtts.length / 2)];
+      const medianOffset = offsets[Math.floor(offsets.length / 2)];
+      
+      // Update history for jitter calculation
+      rttHistory.push(medianRTT);
+      offsetHistory.push(medianOffset);
+      
+      if (rttHistory.length > 20) {
+        rttHistory.shift();
+        offsetHistory.shift();
+      }
+      
+      // Calculate jitter (standard deviation of RTT)
+      if (rttHistory.length > 1) {
+        const avgRTTLocal = rttHistory.reduce((a, b) => a + b) / rttHistory.length;
+        const variance = rttHistory.reduce((sum, rtt) => sum + Math.pow(rtt - avgRTTLocal, 2), 0) / rttHistory.length;
+        jitter = Math.sqrt(variance);
+      }
+      
+      // Apply offset
+      timeOffset = medianOffset;
+      avgRTT = medianRTT;
+      
+      // Update display
+      rttDisplay.textContent = avgRTT.toFixed(1);
+      offsetDisplay.textContent = timeOffset.toFixed(1);
+      jitterDisplay.textContent = jitter.toFixed(1);
+      
+      // Update sync status
+      if (avgRTT < 10 && jitter < 2) {
+        syncQuality = 'excellent';
+        syncStatus.textContent = '⚡ Ultra Sync';
+        syncStatus.className = 'sync-excellent';
+      } else if (avgRTT < 25 && jitter < 5) {
+        syncQuality = 'good';
+        syncStatus.textContent = '● Good Sync';
+        syncStatus.className = 'sync-good';
+      } else {
+        syncQuality = 'poor';
+        syncStatus.textContent = '⚠ Poor Sync';
+        syncStatus.className = 'sync-poor';
+      }
+      
+      console.log(`🎯 Sync: RTT=${avgRTT.toFixed(1)}ms, Offset=${timeOffset.toFixed(1)}ms, Jitter=${jitter.toFixed(1)}ms`);
+    }
+
+    // Ultra-precise playback scheduling
+    async function scheduleUltraLowLatencyPlayback(serverTime, audioTime = 0) {
+      const localTargetTime = serverTime - timeOffset;
+      const now = getHighPrecisionTime();
+      const delay = localTargetTime - now;
+
+      // Sync audio time with minimal tolerance
+      if (Math.abs(audio.currentTime - audioTime) > 0.001) { // 1ms tolerance
+        audio.currentTime = audioTime;
+      }
+
+      console.log(`🎵 Scheduling playback: delay=${delay.toFixed(2)}ms, audioTime=${audioTime.toFixed(3)}s`);
+
+      if (delay > 1) {
+        // For delays > 1ms, use precise sleep
+        await sleep(delay - 0.5); // Pre-position 0.5ms early
+        
+        // Final precise timing
+        const finalCheck = () => {
+          const remainingDelay = (serverTime - timeOffset) - getHighPrecisionTime();
+          if (remainingDelay <= 0.5) {
+            audio.play().then(() => {
+              disc.classList.add('playing');
+              console.log(`✅ Playback started with ${remainingDelay.toFixed(2)}ms precision`);
+            });
+          } else {
+            requestAnimationFrame(finalCheck);
+          }
+        };
+        requestAnimationFrame(finalCheck);
+        
+      } else if (delay > -10) {
+        // Immediate play for small delays or slight lateness
+        audio.play().then(() => {
+          disc.classList.add('playing');
+          console.log(`✅ Immediate playback (${delay.toFixed(2)}ms)`);
+        });
+      } else {
+        console.log(`⚠ Playback too late: ${delay.toFixed(2)}ms`);
+        audio.play().then(() => {
+          disc.classList.add('playing');
+        });
+      }
     }
 
     // Volume control
@@ -713,302 +518,57 @@
       isAdmin = true;
       playBtn.style.display = "inline-block";
       pauseBtn.style.display = "inline-block";
-      searchBtn.style.display = "inline-block";
-      uploadToggleBtn.style.display = "inline-block";
-      searchContainer.classList.add("admin");
-      uploadSection.classList.add("admin");
       adminBadge.style.display = "inline-block";
-      statusText.innerHTML = "🎛️ You have admin controls! Search, upload, and play music for everyone 🎵";
+      statusText.innerHTML = "⚡ You control ultra-low latency playback! Target: <10ms sync precision";
     });
 
-    // Non-admin setup
     socket.on("youAreNotAdmin", () => {
       isAdmin = false;
-      statusText.innerHTML = "👑 Only the admin controls the playback. Everyone else just vibes 😌";
+      statusText.innerHTML = "⚡ Ultra low latency mode. Sync precision: <10ms";
     });
 
-    // Enhanced clock synchronization with quality monitoring
-    function syncClocks() {
-      const start = performance.now();
-      socket.emit("pingTime", start);
-
-      socket.once("pongTime", (serverNow, clientStart) => {
-        const end = performance.now();
-        const rtt = end - clientStart;
-        const estimatedServerNow = serverNow + rtt / 2;
-        timeOffset = estimatedServerNow - end;
-
-        // Monitor sync quality
-        if (rtt < 50) {
-          syncQuality = 'excellent';
-          syncStatus.textContent = '● Excellent Sync';
-          syncStatus.className = 'sync-good';
-        } else if (rtt < 100) {
-          syncQuality = 'good';
-          syncStatus.textContent = '● Good Sync';
-          syncStatus.className = 'sync-good';
-        } else {
-          syncQuality = 'poor';
-          syncStatus.textContent = '● Poor Sync';
-          syncStatus.className = 'sync-poor';
-        }
-      });
-    }
-
-    // Sync more frequently for better accuracy
-    syncClocks();
-    setInterval(syncClocks, 5000);
-
-    // Enhanced playback scheduling with higher precision
-    function schedulePlayback(serverTime, audioTime = 0) {
-      const localPlayTime = serverTime - timeOffset;
-      const delay = localPlayTime - performance.now();
-
-      // More precise time synchronization
-      if (Math.abs(audio.currentTime - audioTime) > 0.02) {
-        audio.currentTime = audioTime;
-      }
-
-      if (delay > 5) {
-        setTimeout(() => {
-          audio.play();
-          disc.classList.add('playing');
-        }, delay);
-      } else if (delay > -50) { // Allow small negative delays
-        audio.play();
-        disc.classList.add('playing');
-      }
-    }
-
-    // Upload functionality
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const file = songFile.files[0];
-      if (!file) {
-        showNotification('Please select a file to upload', true);
-        return;
-      }
-
-      // Check file size (50MB limit)
-      if (file.size > 50 * 1024 * 1024) {
-        showNotification('File size must be less than 50MB', true);
-        return;
-      }
-
-      uploadBtn.disabled = true;
-      uploadBtn.textContent = '⏳ Uploading...';
-
-      const formData = new FormData();
-      formData.append('songFile', file);
-      formData.append('title', songTitleInput.value || '');
-      formData.append('artist', songArtistInput.value || '');
-
-      try {
-        const response = await fetch('/upload-song', {
-          method: 'POST',
-          body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showNotification(`🎵 ${result.song.title} uploaded successfully!`);
-          uploadForm.reset();
-          // Songs database will be updated via socket event
-        } else {
-          showNotification(result.error || 'Upload failed', true);
-        }
-      } catch (error) {
-        console.error('Upload error:', error);
-        showNotification('Upload failed. Please try again.', true);
-      } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = '🎵 Upload Song';
-      }
-    });
-
-    // Song search functionality
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase().trim();
-      if (query.length > 1) {
-        const results = songsDatabase.filter(song => 
-          song.title.toLowerCase().includes(query) || 
-          song.artist.toLowerCase().includes(query)
-        );
-        displaySearchResults(results);
-      } else {
-        searchResults.style.display = 'none';
-      }
-    });
-
-    function displaySearchResults(results) {
-      searchResults.innerHTML = '';
-      if (results.length > 0) {
-        results.forEach(song => {
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'search-result';
-          resultDiv.innerHTML = `
-            <div class="result-info">
-              <div class="result-title">${song.title}</div>
-              <div class="result-artist">${song.artist}</div>
-              <div class="result-duration">${song.duration}</div>
-            </div>
-            <div style="display: flex; align-items: center;">
-              <span class="song-type-badge">${song.type}</span>
-              ${song.type === 'uploaded' && isAdmin ? `<button class="delete-btn" onclick="deleteSong(${song.id})">🗑️</button>` : ''}
-            </div>
-          `;
-          resultDiv.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('delete-btn')) {
-              selectSong(song);
-            }
-          });
-          searchResults.appendChild(resultDiv);
-        });
-        searchResults.style.display = 'block';
-      } else {
-        searchResults.innerHTML = '<div class="search-result">No songs found</div>';
-        searchResults.style.display = 'block';
-      }
-    }
-
-    // Delete song function
-    async function deleteSong(songId) {
+    // Ultra-precise play button
+    playBtn.onclick = async () => {
       if (!isAdmin) return;
       
-      if (confirm('Are you sure you want to delete this song?')) {
-        try {
-          const response = await fetch(`/api/songs/${songId}`, {
-            method: 'DELETE'
-          });
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            showNotification('🗑️ Song deleted successfully');
-            // Songs database will be updated via socket event
-          } else {
-            showNotification(result.error || 'Delete failed', true);
-          }
-        } catch (error) {
-          console.error('Delete error:', error);
-          showNotification('Delete failed. Please try again.', true);
-        }
-      }
-    }
-
-    function selectSong(song) {
-      if (!isAdmin) return; // Only admin can select songs
-      
-      currentSong = song;
-      audio.src = song.url;
-      songTitle.textContent = song.title;
-      songArtist.textContent = song.artist;
-      searchResults.style.display = 'none';
-      searchInput.value = '';
-      
-      console.log("Admin selected song:", song.title, "URL:", song.url);
-      
-      // Notify all clients about the song change
-      socket.emit('songChange', {
-        title: song.title,
-        artist: song.artist,
-        url: song.url
-      });
-    }
-
-    // Toggle buttons
-    uploadToggleBtn.onclick = () => {
-      const isVisible = uploadSection.style.display !== 'none';
-      uploadSection.style.display = isVisible ? 'none' : 'block';
-      searchContainer.style.display = 'none'; // Hide search when showing upload
-    };
-
-    searchBtn.onclick = () => {
-      const isVisible = searchContainer.style.display !== 'none';
-      searchContainer.style.display = isVisible ? 'none' : 'block';
-      uploadSection.style.display = 'none'; // Hide upload when showing search
-      if (!isVisible) {
-        searchInput.focus();
-      }
-    };
-
-    // Enhanced play button with better synchronization
-    playBtn.onclick = () => {
-      if (!isAdmin || !currentSong) return;
-      
-      const localNow = performance.now();
+      const localNow = getHighPrecisionTime();
       const serverNow = localNow + timeOffset;
-      // Reduce delay for more immediate playback
-      const playAtServer = serverNow + 100; // Much smaller delay
+      
+      // Minimal delay - just enough for network transmission
+      const networkCompensation = Math.max(avgRTT * 0.6, 5); // 60% of RTT or 5ms minimum
+      const playAtServer = serverNow + networkCompensation;
 
-      socket.emit("playAt", {
+      console.log(`🚀 Admin triggering ultra-low latency play: network_compensation=${networkCompensation.toFixed(1)}ms`);
+
+      socket.emit("ultraPlayAt", {
         serverTimestamp: playAtServer,
         audioTime: audio.currentTime,
       });
 
-      schedulePlayback(playAtServer, audio.currentTime);
+      await scheduleUltraLowLatencyPlayback(playAtServer, audio.currentTime);
     };
 
     // Pause button
     pauseBtn.onclick = () => {
       if (!isAdmin) return;
-      socket.emit("pause");
+      socket.emit("ultraPause");
       audio.pause();
       disc.classList.remove('playing');
+      console.log("⏸️ Admin paused playback");
     };
 
-    // Listen to server events
-    socket.on("playAt", ({ serverTimestamp, audioTime }) => {
-      schedulePlayback(serverTimestamp, audioTime);
+    // Socket events
+    socket.on("ultraPlayAt", async ({ serverTimestamp, audioTime }) => {
+      await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime);
     });
 
-    socket.on("pause", () => {
+    socket.on("ultraPause", () => {
       audio.pause();
       disc.classList.remove('playing');
+      console.log("⏸️ Received pause command");
     });
 
-    socket.on("songChange", ({ title, artist, url }) => {
-      songTitle.textContent = title;
-      songArtist.textContent = artist;
-      // Update audio source for ALL users (admin and non-admin)
-      if (url && audio.src !== window.location.origin + url) {
-        audio.src = url;
-        currentSong = { title, artist, url };
-        console.log("Song changed to:", title, "by", artist, "URL:", url);
-      }
-    });
-
-    // Listen for songs database updates
-    socket.on("songsUpdated", (newSongsDatabase) => {
-      songsDatabase = newSongsDatabase;
-      console.log('Songs database updated for', isAdmin ? 'ADMIN' : 'USER', ':', songsDatabase.length, 'songs');
-      
-      // Initialize with a default song if this is the first load and no current song
-      if (songsDatabase.length > 0 && !currentSong) {
-        const defaultSong = songsDatabase[0];
-        // Don't auto-load for non-admin users, wait for admin to select
-        if (isAdmin) {
-          audio.src = defaultSong.url;
-          songTitle.textContent = defaultSong.title;
-          songArtist.textContent = defaultSong.artist;
-          currentSong = defaultSong;
-        }
-      }
-      
-      // Refresh search results if search is active
-      if (searchContainer.style.display !== 'none' && searchInput.value.length > 1) {
-        const query = searchInput.value.toLowerCase().trim();
-        const results = songsDatabase.filter(song => 
-          song.title.toLowerCase().includes(query) || 
-          song.artist.toLowerCase().includes(query)
-        );
-        displaySearchResults(results);
-      }
-    });
-
-    // Audio event listeners
+    // Audio events
     audio.addEventListener('play', () => {
       disc.classList.add('playing');
     });
@@ -1017,14 +577,54 @@
       disc.classList.remove('playing');
     });
 
-    // Handle audio errors
+    audio.addEventListener('canplaythrough', () => {
+      console.log("✅ Audio ready for ultra-low latency playback");
+    });
+
     audio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
       statusText.textContent = '⚠️ Error loading audio file';
     });
 
-    // Remove the initial songs loading since it's now handled by socket
-    // The server will send songsUpdated event on connection
+    // Start ultra-precise synchronization
+    const startUltraSyncMode = async () => {
+      console.log("🎯 Starting ultra-low latency sync mode...");
+      
+      // Initial sync
+      await performPrecisionSync();
+      
+      // Continuous high-frequency sync
+      setInterval(async () => {
+        await performPrecisionSync();
+      }, 1000); // Every 1 second for ultra-precision
+      
+      // Micro-adjustments every 100ms
+      setInterval(() => {
+        if (rttHistory.length > 5) {
+          const recentRTT = rttHistory.slice(-5).reduce((a, b) => a + b) / 5;
+          const recentOffset = offsetHistory.slice(-5).reduce((a, b) => a + b) / 5;
+          
+          // Small adjustment if drift detected
+          const drift = Math.abs(recentOffset - timeOffset);
+          if (drift > 0.5) {
+            timeOffset = recentOffset;
+            console.log(`🔧 Micro-adjustment: drift=${drift.toFixed(2)}ms`);
+          }
+        }
+      }, 100);
+    };
+
+    // Initialize when connected
+    socket.on('connect', () => {
+      console.log("🔗 Connected to ultra-low latency server");
+      startUltraSyncMode();
+    });
+
+    socket.on('disconnect', () => {
+      console.log("❌ Disconnected from server");
+      syncStatus.textContent = '❌ Disconnected';
+      syncStatus.className = 'sync-poor';
+    });
 
     // Keyboard shortcuts for admin
     document.addEventListener('keydown', (e) => {
@@ -1040,8 +640,19 @@
       }
     });
 
-    // Make deleteSong function global for onclick handler
-    window.deleteSong = deleteSong;
+    // Performance monitoring
+    let performanceStats = {
+      playLatencies: [],
+      syncDrifts: []
+    };
+
+    setInterval(() => {
+      if (performanceStats.playLatencies.length > 0) {
+        const avgLatency = performanceStats.playLatencies.reduce((a, b) => a + b) / performanceStats.playLatencies.length;
+        console.log(`📊 Avg play latency: ${avgLatency.toFixed(2)}ms`);
+        performanceStats.playLatencies = [];
+      }
+    }, 10000);
   </script>
 </body>
 </html>
