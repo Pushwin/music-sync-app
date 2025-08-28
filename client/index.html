@@ -107,6 +107,8 @@
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     h1 {
@@ -146,6 +148,89 @@
     .song-artist {
       font-size: 0.9rem;
       color: #b0b0b0;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      margin-bottom: 25px;
+      display: none;
+      background: rgba(78, 205, 196, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+    }
+
+    .upload-section.admin {
+      display: block;
+    }
+
+    .upload-title {
+      color: #4ecdc4;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .upload-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row input {
+      flex: 1;
+    }
+
+    .upload-input, .text-input {
+      padding: 12px 15px;
+      border: none;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 0.9rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .upload-input::file-selector-button {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .text-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      border: none;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .search-container {
@@ -188,6 +273,9 @@
       cursor: pointer;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .search-result:hover {
@@ -196,6 +284,11 @@
 
     .search-result:last-child {
       border-bottom: none;
+    }
+
+    .result-info {
+      flex: 1;
+      text-align: left;
     }
 
     .result-title {
@@ -211,6 +304,31 @@
     .result-duration {
       font-size: 0.8rem;
       color: #888;
+    }
+
+    .song-type-badge {
+      background: rgba(78, 205, 196, 0.3);
+      color: #4ecdc4;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      margin-left: 10px;
+    }
+
+    .delete-btn {
+      background: rgba(255, 107, 107, 0.3);
+      color: #ff6b6b;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background: rgba(255, 107, 107, 0.5);
     }
 
     audio {
@@ -259,12 +377,12 @@
       transform: none;
     }
 
-    .search-btn {
+    .search-btn, .upload-toggle-btn {
       background: linear-gradient(135deg, #4ecdc4, #44a08d);
       box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
     }
 
-    .search-btn:hover {
+    .search-btn:hover, .upload-toggle-btn:hover {
       box-shadow: 0 15px 35px rgba(78, 205, 196, 0.4);
     }
 
@@ -370,6 +488,38 @@
     .sync-good { color: #4ecdc4; }
     .sync-poor { color: #ff6b6b; }
 
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(78, 205, 196, 0.9);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      font-weight: 600;
+      z-index: 1000;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+
+    .notification.error {
+      background: rgba(255, 107, 107, 0.9);
+    }
+
+    .notification.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateX(-50%) translateY(-100%);
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 25px;
@@ -387,6 +537,10 @@
       .control-btn {
         padding: 12px 20px;
         font-size: 1rem;
+      }
+
+      .form-row {
+        flex-direction: column;
       }
     }
   </style>
@@ -414,13 +568,29 @@
     <span id="syncStatus" class="sync-good">● Synced</span>
   </div>
 
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+
   <div class="container">
     <div id="adminBadge" class="admin-badge" style="display: none;">
       👑 ADMIN CONTROLS
     </div>
 
     <h1>🎶 Harmony Sync</h1>
-    <p class="subtitle">Listen together. Feel together. Synced from heart to heart 💓</p>
+    <p class="subtitle">Listen together. Feel together. Synced from heart to heart 💕</p>
+
+    <!-- Upload Section (Admin Only) -->
+    <div id="uploadSection" class="upload-section">
+      <div class="upload-title">📁 Upload Your Music</div>
+      <form id="uploadForm" class="upload-form">
+        <input type="file" id="songFile" class="upload-input" accept="audio/*" required>
+        <div class="form-row">
+          <input type="text" id="songTitleInput" class="text-input" placeholder="Song Title (optional)">
+          <input type="text" id="songArtistInput" class="text-input" placeholder="Artist (optional)">
+        </div>
+        <button type="submit" id="uploadBtn" class="upload-btn">🎵 Upload Song</button>
+      </form>
+    </div>
 
     <!-- Song Search (Admin Only) -->
     <div id="searchContainer" class="search-container">
@@ -444,6 +614,9 @@
 
     <!-- Controls -->
     <div class="controls">
+      <button id="uploadToggleBtn" class="control-btn upload-toggle-btn" style="display: none;">
+        📁 Upload
+      </button>
       <button id="searchBtn" class="control-btn search-btn" style="display: none;">
         🔍 Find Song
       </button>
@@ -492,64 +665,43 @@
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
     const searchBtn = document.getElementById("searchBtn");
+    const uploadToggleBtn = document.getElementById("uploadToggleBtn");
     const audio = document.getElementById("audio");
     const volumeSlider = document.getElementById("volumeSlider");
     const searchInput = document.getElementById("searchInput");
     const searchResults = document.getElementById("searchResults");
     const searchContainer = document.getElementById("searchContainer");
+    const uploadSection = document.getElementById("uploadSection");
+    const uploadForm = document.getElementById("uploadForm");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const songFile = document.getElementById("songFile");
+    const songTitleInput = document.getElementById("songTitleInput");
+    const songArtistInput = document.getElementById("songArtistInput");
     const adminBadge = document.getElementById("adminBadge");
     const songTitle = document.getElementById("songTitle");
     const songArtist = document.getElementById("songArtist");
     const disc = document.getElementById("disc");
     const statusText = document.getElementById("statusText");
     const syncStatus = document.getElementById("syncStatus");
+    const notification = document.getElementById("notification");
 
     let isAdmin = false;
     let timeOffset = 0;
     let syncQuality = 'good';
     let currentSong = null;
+    let songsDatabase = [];
 
     // Audio setup
     audio.volume = volumeSlider.value;
 
-    // Sample songs database (you can expand this or connect to a real API)
-    const songsDatabase = [
-      {
-        id: 1,
-        title: "Lo-Fi Chill Vibes",
-        artist: "Ambient Collective",
-        duration: "3:45",
-        url: "https://media.vocaroo.com/mp3/13vvld8kQ12W"
-      },
-      {
-        id: 2,
-        title: "Sunset Dreams",
-        artist: "Chillwave Studio",
-        duration: "4:12",
-        url: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
-      },
-      {
-        id: 3,
-        title: "Ocean Breeze",
-        artist: "Nature Sounds Co",
-        duration: "5:30",
-        url: "https://file-examples.com/storage/fe96ac13b66ebe89c2b9094/2017/11/file_example_MP3_700KB.mp3"
-      },
-      {
-        id: 4,
-        title: "Coffee Shop Jazz",
-        artist: "Jazz Ensemble",
-        duration: "6:15",
-        url: "https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3"
-      },
-      {
-        id: 5,
-        title: "Midnight City",
-        artist: "Synthwave",
-        duration: "4:33",
-        url: "https://media.vocaroo.com/mp3/13vvld8kQ12W"
-      }
-    ];
+    // Notification system
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.className = `notification ${isError ? 'error' : ''} show`;
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
 
     // Volume control
     volumeSlider.oninput = (e) => {
@@ -562,9 +714,11 @@
       playBtn.style.display = "inline-block";
       pauseBtn.style.display = "inline-block";
       searchBtn.style.display = "inline-block";
+      uploadToggleBtn.style.display = "inline-block";
       searchContainer.classList.add("admin");
+      uploadSection.classList.add("admin");
       adminBadge.style.display = "inline-block";
-      statusText.innerHTML = "🎛️ You have admin controls! Search and play music for everyone 🎵";
+      statusText.innerHTML = "🎛️ You have admin controls! Search, upload, and play music for everyone 🎵";
     });
 
     // Enhanced clock synchronization with quality monitoring
@@ -620,6 +774,54 @@
       }
     }
 
+    // Upload functionality
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const file = songFile.files[0];
+      if (!file) {
+        showNotification('Please select a file to upload', true);
+        return;
+      }
+
+      // Check file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        showNotification('File size must be less than 50MB', true);
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = '⏳ Uploading...';
+
+      const formData = new FormData();
+      formData.append('songFile', file);
+      formData.append('title', songTitleInput.value || '');
+      formData.append('artist', songArtistInput.value || '');
+
+      try {
+        const response = await fetch('/upload-song', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showNotification(`🎵 ${result.song.title} uploaded successfully!`);
+          uploadForm.reset();
+          // Songs database will be updated via socket event
+        } else {
+          showNotification(result.error || 'Upload failed', true);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        showNotification('Upload failed. Please try again.', true);
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = '🎵 Upload Song';
+      }
+    });
+
     // Song search functionality
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.toLowerCase().trim();
@@ -641,17 +843,52 @@
           const resultDiv = document.createElement('div');
           resultDiv.className = 'search-result';
           resultDiv.innerHTML = `
-            <div class="result-title">${song.title}</div>
-            <div class="result-artist">${song.artist}</div>
-            <div class="result-duration">${song.duration}</div>
+            <div class="result-info">
+              <div class="result-title">${song.title}</div>
+              <div class="result-artist">${song.artist}</div>
+              <div class="result-duration">${song.duration}</div>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span class="song-type-badge">${song.type}</span>
+              ${song.type === 'uploaded' && isAdmin ? `<button class="delete-btn" onclick="deleteSong(${song.id})">🗑️</button>` : ''}
+            </div>
           `;
-          resultDiv.addEventListener('click', () => selectSong(song));
+          resultDiv.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('delete-btn')) {
+              selectSong(song);
+            }
+          });
           searchResults.appendChild(resultDiv);
         });
         searchResults.style.display = 'block';
       } else {
         searchResults.innerHTML = '<div class="search-result">No songs found</div>';
         searchResults.style.display = 'block';
+      }
+    }
+
+    // Delete song function
+    async function deleteSong(songId) {
+      if (!isAdmin) return;
+      
+      if (confirm('Are you sure you want to delete this song?')) {
+        try {
+          const response = await fetch(`/api/songs/${songId}`, {
+            method: 'DELETE'
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            showNotification('🗑️ Song deleted successfully');
+            // Songs database will be updated via socket event
+          } else {
+            showNotification(result.error || 'Delete failed', true);
+          }
+        } catch (error) {
+          console.error('Delete error:', error);
+          showNotification('Delete failed. Please try again.', true);
+        }
       }
     }
 
@@ -671,10 +908,17 @@
       });
     }
 
-    // Search button toggle
+    // Toggle buttons
+    uploadToggleBtn.onclick = () => {
+      const isVisible = uploadSection.style.display !== 'none';
+      uploadSection.style.display = isVisible ? 'none' : 'block';
+      searchContainer.style.display = 'none'; // Hide search when showing upload
+    };
+
     searchBtn.onclick = () => {
       const isVisible = searchContainer.style.display !== 'none';
       searchContainer.style.display = isVisible ? 'none' : 'block';
+      uploadSection.style.display = 'none'; // Hide upload when showing search
       if (!isVisible) {
         searchInput.focus();
       }
@@ -723,6 +967,22 @@
       }
     });
 
+    // Listen for songs database updates
+    socket.on("songsUpdated", (newSongsDatabase) => {
+      songsDatabase = newSongsDatabase;
+      console.log('Songs database updated:', songsDatabase.length, 'songs');
+      
+      // Refresh search results if search is active
+      if (searchContainer.style.display !== 'none' && searchInput.value.length > 1) {
+        const query = searchInput.value.toLowerCase().trim();
+        const results = songsDatabase.filter(song => 
+          song.title.toLowerCase().includes(query) || 
+          song.artist.toLowerCase().includes(query)
+        );
+        displaySearchResults(results);
+      }
+    });
+
     // Audio event listeners
     audio.addEventListener('play', () => {
       disc.classList.add('playing');
@@ -735,17 +995,28 @@
     // Handle audio errors
     audio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
-      statusText.textContent = '❌ Error loading audio file';
+      statusText.textContent = '⚠️ Error loading audio file';
     });
 
-    // Initialize with a default song
-    if (songsDatabase.length > 0) {
-      const defaultSong = songsDatabase[0];
-      audio.src = defaultSong.url;
-      songTitle.textContent = defaultSong.title;
-      songArtist.textContent = defaultSong.artist;
-      currentSong = defaultSong;
-    }
+    // Load initial songs database
+    fetch('/api/songs')
+      .then(response => response.json())
+      .then(songs => {
+        songsDatabase = songs;
+        console.log('Initial songs loaded:', songsDatabase.length, 'songs');
+        
+        // Initialize with a default song if available
+        if (songsDatabase.length > 0) {
+          const defaultSong = songsDatabase[0];
+          audio.src = defaultSong.url;
+          songTitle.textContent = defaultSong.title;
+          songArtist.textContent = defaultSong.artist;
+          currentSong = defaultSong;
+        }
+      })
+      .catch(error => {
+        console.error('Error loading songs:', error);
+      });
 
     // Keyboard shortcuts for admin
     document.addEventListener('keydown', (e) => {
@@ -760,6 +1031,9 @@
         }
       }
     });
+
+    // Make deleteSong function global for onclick handler
+    window.deleteSong = deleteSong;
   </script>
 </body>
 </html>
