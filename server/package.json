@@ -1,16 +1,32 @@
 {
-  "name": "server",
-  "version": "1.0.0",
+  "name": "harmony-sync-server",
+  "version": "2.0.0",
+  "description": "A synchronized music listening experience with zero-delay playback",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "music",
+    "synchronization",
+    "websocket",
+    "realtime",
+    "audio",
+    "streaming"
+  ],
+  "author": "Harmony Sync Team",
+  "license": "MIT",
   "dependencies": {
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }
