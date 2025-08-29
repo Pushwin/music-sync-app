@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>🎵 Harmony Sync - Zero Delay</title>
+  <title>🎵 Harmony Sync - Zero Delay Perfect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * {
@@ -82,6 +82,13 @@
       color: #b0b0b0;
     }
 
+    .timeline-info {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #4ecdc4;
+      font-weight: 500;
+    }
+
     audio {
       width: 100%;
       margin-bottom: 25px;
@@ -129,6 +136,17 @@
 
     .control-btn.secondary:hover {
       box-shadow: 0 15px 35px rgba(78, 205, 196, 0.4);
+    }
+
+    .sync-btn {
+      background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+      color: #000 !important;
+      box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3) !important;
+      font-weight: 800;
+    }
+
+    .sync-btn:hover {
+      box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5) !important;
     }
 
     .volume-container {
@@ -381,7 +399,7 @@
     <div id="roleBadge" style="display: none;"></div>
 
     <h1>⚡ Harmony Sync</h1>
-    <p class="subtitle">Zero-Delay Synchronized Music Experience</p>
+    <p class="subtitle">Zero-Delay Perfect Timeline Synchronization</p>
 
     <!-- Song Library (Admin only) -->
     <div id="songLibrary" class="song-library" style="display: none;">
@@ -393,6 +411,7 @@
     <div class="now-playing">
       <div class="song-title" id="songTitle">Select a song to get started</div>
       <div class="song-artist" id="songArtist">Harmony Sync</div>
+      <div class="timeline-info" id="timelineInfo">Timeline: 0:00 / 0:00</div>
     </div>
 
     <!-- Audio Player -->
@@ -401,13 +420,13 @@
     <!-- Controls -->
     <div class="controls">
       <button id="playBtn" class="control-btn" style="display: none;">
-        ⚡ Play
+        ⚡ Play Sync
       </button>
       <button id="pauseBtn" class="control-btn" style="display: none;">
         ⏸️ Pause
       </button>
-      <button id="syncBtn" class="control-btn secondary" style="display: none;">
-        🔄 Force Sync
+      <button id="syncBtn" class="control-btn sync-btn" style="display: none;">
+        🔄 Force Timeline Sync
       </button>
     </div>
 
@@ -460,6 +479,7 @@
     const userCount = document.getElementById("userCount");
     const songTitle = document.getElementById("songTitle");
     const songArtist = document.getElementById("songArtist");
+    const timelineInfo = document.getElementById("timelineInfo");
     const songLibrary = document.getElementById("songLibrary");
     const songList = document.getElementById("songList");
     const fileUpload = document.getElementById("fileUpload");
@@ -476,6 +496,8 @@
     let currentSong = null;
     let songs = [];
     let selectedSongId = null;
+    let lastSyncedTime = 0; // Track synced position
+    let isSyncing = false;
 
     // High precision timing
     const getHighPrecisionTime = () => {
@@ -504,6 +526,26 @@
         }
       });
     };
+
+    // Format time for display
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Update timeline display
+    function updateTimelineDisplay() {
+      if (audio.duration && !isNaN(audio.duration)) {
+        const current = formatTime(audio.currentTime);
+        const total = formatTime(audio.duration);
+        timelineInfo.textContent = `Timeline: ${current} / ${total}`;
+      }
+    }
+
+    // Monitor audio timeline changes
+    audio.addEventListener('timeupdate', updateTimelineDisplay);
+    audio.addEventListener('loadedmetadata', updateTimelineDisplay);
 
     // Clock synchronization
     async function performPrecisionSync() {
@@ -558,7 +600,7 @@
       
       // Update sync quality
       if (avgRTT < 15) {
-        syncStatus.textContent = '⚡ Ultra Sync';
+        syncStatus.textContent = '⚡ Perfect Sync';
         syncStatus.className = 'sync-excellent';
       } else if (avgRTT < 50) {
         syncStatus.textContent = '● Good Sync';
@@ -570,17 +612,19 @@
     }
 
     // Ultra-precise playback scheduling
-    async function scheduleUltraLowLatencyPlayback(serverTime, audioTime = 0) {
+    async function scheduleUltraLowLatencyPlayback(serverTime, audioTime = 0, forceSeek = true) {
       const localTargetTime = serverTime - timeOffset;
       const now = getHighPrecisionTime();
       const delay = localTargetTime - now;
 
-      // Sync audio time
-      if (Math.abs(audio.currentTime - audioTime) > 0.01) {
-        audio.currentTime = audioTime;
-      }
-
       console.log(`🎵 Scheduling playback: delay=${delay.toFixed(2)}ms, audioTime=${audioTime.toFixed(3)}s`);
+
+      // Force seek to exact position if needed
+      if (forceSeek && Math.abs(audio.currentTime - audioTime) > 0.01) {
+        audio.currentTime = audioTime;
+        lastSyncedTime = audioTime;
+        console.log(`🎯 Seeking to: ${audioTime.toFixed(3)}s`);
+      }
 
       if (delay > 1) {
         await sleep(delay - 0.5);
@@ -590,7 +634,7 @@
           if (remainingDelay <= 0.5) {
             audio.play().then(() => {
               disc.classList.add('playing');
-              console.log(`✅ Playback started with ${remainingDelay.toFixed(2)}ms precision`);
+              console.log(`✅ Perfect sync playback: ${remainingDelay.toFixed(2)}ms precision`);
             });
           } else {
             requestAnimationFrame(finalCheck);
@@ -604,7 +648,11 @@
           console.log(`✅ Immediate playback (${delay.toFixed(2)}ms)`);
         });
       } else {
-        console.log(`⚠ Playback too late: ${delay.toFixed(2)}ms`);
+        console.log(`⚠ Playback compensating for late start: ${delay.toFixed(2)}ms`);
+        // Compensate for being late
+        if (audioTime - delay/1000 > 0) {
+          audio.currentTime = audioTime - delay/1000;
+        }
         audio.play().then(() => {
           disc.classList.add('playing');
         });
@@ -642,11 +690,16 @@
       songArtist.textContent = song.artist;
       audio.src = song.url;
       
+      // Reset timeline
+      audio.currentTime = 0;
+      lastSyncedTime = 0;
+      
       // Notify server and other clients
       socket.emit("songChange", {
         title: song.title,
         artist: song.artist,
-        url: song.url
+        url: song.url,
+        audioTime: 0
       });
 
       updateSongLibrary();
@@ -696,30 +749,58 @@
       
       const localNow = getHighPrecisionTime();
       const serverNow = localNow + timeOffset;
-      const networkCompensation = Math.max(avgRTT * 0.6, 10);
+      const networkCompensation = Math.max(avgRTT * 0.7, 15); // Slightly more compensation
       const playAtServer = serverNow + networkCompensation;
 
-      console.log(`🚀 Admin triggering play: network_compensation=${networkCompensation.toFixed(1)}ms`);
+      console.log(`🚀 Admin triggering synchronized play at ${formatTime(audio.currentTime)}`);
 
       socket.emit("ultraPlayAt", {
         serverTimestamp: playAtServer,
         audioTime: audio.currentTime,
       });
 
-      await scheduleUltraLowLatencyPlayback(playAtServer, audio.currentTime);
+      await scheduleUltraLowLatencyPlayback(playAtServer, audio.currentTime, false);
     };
 
     pauseBtn.onclick = () => {
       if (!isAdmin) return;
-      socket.emit("ultraPause");
+      socket.emit("ultraPause", { 
+        audioTime: audio.currentTime 
+      });
       audio.pause();
       disc.classList.remove('playing');
-      console.log("⏸️ Admin paused playback");
+      console.log(`⏸️ Admin paused at ${formatTime(audio.currentTime)}`);
     };
 
+    // FORCE TIMELINE SYNC - This is the key feature you wanted!
     syncBtn.onclick = () => {
-      performPrecisionSync();
-      statusText.textContent = '🔄 Forcing synchronization...';
+      if (!isAdmin) return;
+      
+      // Get current timeline position
+      const currentTime = audio.currentTime;
+      
+      console.log(`🎯 FORCE SYNC: Syncing all devices to ${formatTime(currentTime)}`);
+      
+      // Pause locally first
+      audio.pause();
+      disc.classList.remove('playing');
+      
+      // Send force sync command with current timeline position
+      socket.emit("forceTimelineSync", {
+        audioTime: currentTime,
+        pauseFirst: true
+      });
+      
+      statusText.textContent = `🎯 Timeline synced to ${formatTime(currentTime)} across all devices!`;
+      
+      // Visual feedback
+      syncBtn.textContent = '✅ Synced!';
+      syncBtn.style.background = 'linear-gradient(135deg, #00ff88, #4ecdc4)';
+      
+      setTimeout(() => {
+        syncBtn.textContent = '🔄 Force Timeline Sync';
+        syncBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+      }, 2000);
     };
 
     // Socket event handlers
@@ -748,20 +829,9 @@
       syncBtn.style.display = "inline-block";
       songLibrary.style.display = "block";
       fileUpload.style.display = "block";
-      roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control the music!</div>';
+      roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Timeline auto-syncs!</div>';
       roleBadge.style.display = "block";
-      statusText.textContent = "👑 You are the admin! Control music playback for everyone.";
-    });
-
-    socket.on("youAreNotAdmin", () => {
-      isAdmin = false;
-      playBtn.style.display = "none";
-      pauseBtn.style.display = "none";
-      songLibrary.style.display = "none";
-      fileUpload.style.display = "none";
-      roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Enjoy the music!</div>';
-      roleBadge.style.display = "block";
-      statusText.textContent = "🎧 You're listening! The admin controls the music.";
+      statusText.textContent = "🎧 Timeline will auto-sync when admin uses Force Sync!";
     });
 
     socket.on("songsUpdated", (songData) => {
@@ -775,25 +845,79 @@
       songArtist.textContent = songData.artist;
       if (songData.url) {
         audio.src = songData.url;
+        // Set to synced position if provided
+        if (songData.audioTime !== undefined) {
+          audio.currentTime = songData.audioTime;
+          lastSyncedTime = songData.audioTime;
+        }
       }
       console.log(`🎵 Song changed: ${songData.title} by ${songData.artist}`);
     });
 
+    // FORCE TIMELINE SYNC - Received from admin
+    socket.on("forceTimelineSync", ({ audioTime, pauseFirst }) => {
+      if (isAdmin) return; // Admin already handled it locally
+      
+      console.log(`🎯 RECEIVED FORCE SYNC: Setting timeline to ${formatTime(audioTime)}`);
+      
+      // Pause first if requested
+      if (pauseFirst) {
+        audio.pause();
+        disc.classList.remove('playing');
+      }
+      
+      // Set exact timeline position
+      audio.currentTime = audioTime;
+      lastSyncedTime = audioTime;
+      
+      statusText.textContent = `🎯 Timeline synced to ${formatTime(audioTime)} by admin!`;
+      
+      // Visual feedback for non-admin users
+      timelineInfo.style.color = '#ffd700';
+      timelineInfo.style.fontWeight = 'bold';
+      
+      setTimeout(() => {
+        timelineInfo.style.color = '#4ecdc4';
+        timelineInfo.style.fontWeight = 'normal';
+      }, 3000);
+    });
+
     socket.on("ultraPlayAt", async ({ serverTimestamp, audioTime }) => {
       if (!isAdmin) { // Only non-admins receive this
-        await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime);
+        await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime, true);
       }
     });
 
-    socket.on("ultraPause", () => {
+    socket.on("ultraPause", ({ audioTime }) => {
       if (!isAdmin) { // Only non-admins receive this  
         audio.pause();
         disc.classList.remove('playing');
-        console.log("⏸️ Received pause command");
+        
+        // Sync timeline position if provided
+        if (audioTime !== undefined) {
+          audio.currentTime = audioTime;
+          lastSyncedTime = audioTime;
+        }
+        
+        console.log(`⏸️ Received pause at ${formatTime(audioTime || audio.currentTime)}`);
       }
     });
 
-    // Audio events
+    // LEGACY EVENT HANDLERS (for compatibility)
+    socket.on("playAt", ({ serverTimestamp, audioTime }) => {
+      if (!isAdmin) {
+        scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime, true);
+      }
+    });
+
+    socket.on("pause", () => {
+      if (!isAdmin) {
+        audio.pause();
+        disc.classList.remove('playing');
+      }
+    });
+
+    // Audio event listeners
     audio.addEventListener('play', () => {
       disc.classList.add('playing');
     });
@@ -803,12 +927,40 @@
     });
 
     audio.addEventListener('canplaythrough', () => {
-      console.log("✅ Audio ready for playback");
+      console.log("✅ Audio ready for perfect sync playback");
     });
 
     audio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
       statusText.textContent = '⚠️ Error loading audio file';
+    });
+
+    // Detect when admin manually seeks (drags timeline)
+    audio.addEventListener('seeked', () => {
+      if (isAdmin && !isSyncing) {
+        const newTime = audio.currentTime;
+        console.log(`🎯 Admin manually seeked to: ${formatTime(newTime)}`);
+        statusText.textContent = `🎯 Dragged to ${formatTime(newTime)} - Use Force Sync to sync all devices!`;
+        
+        // Highlight the sync button
+        syncBtn.style.animation = 'pulse 1s infinite';
+      }
+    });
+
+    // CSS animation for highlighting sync button
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3); }
+        50% { transform: scale(1.05); box-shadow: 0 15px 35px rgba(255, 215, 0, 0.6); }
+        100% { transform: scale(1); box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Stop pulse animation when sync is used
+    syncBtn.addEventListener('click', () => {
+      syncBtn.style.animation = 'none';
     });
 
     // Keyboard shortcuts for admin
@@ -822,15 +974,38 @@
         } else {
           pauseBtn.click();
         }
+      } else if (e.code === 'KeyS' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        syncBtn.click();
       }
     });
 
-    // Set default audio
+    // Set default audio properties
     audio.volume = volumeSlider.value;
     audio.preload = "auto";
 
+    // Continuous timeline monitoring for perfect sync
+    setInterval(() => {
+      if (!audio.paused && audio.currentTime) {
+        updateTimelineDisplay();
+      }
+    }, 100);
+
     // Initialize
-    console.log("🎵 Harmony Sync Client Initialized");
+    console.log("🎵 Zero-Delay Harmony Sync Client Initialized");
+    console.log("🎯 Perfect timeline synchronization enabled");
   </script>
 </body>
-</html>
+</html> = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
+      roleBadge.style.display = "block";
+      statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+    });
+
+    socket.on("youAreNotAdmin", () => {
+      isAdmin = false;
+      playBtn.style.display = "none";
+      pauseBtn.style.display = "none";
+      songLibrary.style.display = "none";
+      fileUpload.style.display = "none";
+      syncBtn.style.display = "none";
+      roleBadge.innerHTML
