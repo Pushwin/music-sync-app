@@ -122,6 +122,15 @@
       transform: none;
     }
 
+    .control-btn.secondary {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+    }
+
+    .control-btn.secondary:hover {
+      box-shadow: 0 15px 35px rgba(78, 205, 196, 0.4);
+    }
+
     .volume-container {
       display: flex;
       align-items: center;
@@ -238,6 +247,96 @@
       margin-bottom: 20px;
     }
 
+    .user-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .song-library {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .song-item:hover {
+      background: rgba(255, 107, 107, 0.1);
+      transform: translateX(5px);
+    }
+
+    .song-item.selected {
+      background: rgba(255, 107, 107, 0.2);
+      border: 1px solid rgba(255, 107, 107, 0.5);
+    }
+
+    .song-info {
+      text-align: left;
+    }
+
+    .song-info h4 {
+      color: #ff6b6b;
+      margin-bottom: 3px;
+    }
+
+    .song-info p {
+      color: #b0b0b0;
+      font-size: 0.8rem;
+    }
+
+    .connection-status {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .connected { color: #00ff88; }
+    .disconnected { color: #ff6b6b; }
+
+    .file-upload {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 25px;
@@ -260,6 +359,11 @@
   </style>
 </head>
 <body>
+  <!-- Connection status indicator -->
+  <div class="connection-status">
+    <span id="connectionStatus" class="disconnected">🔴 Connecting...</span>
+  </div>
+
   <!-- Sync status indicator -->
   <div class="sync-status">
     <span id="syncStatus" class="sync-good">● Syncing...</span>
@@ -269,21 +373,26 @@
   <div class="latency-info">
     <div>RTT: <span id="rttDisplay">--</span>ms</div>
     <div>Offset: <span id="offsetDisplay">--</span>ms</div>
-    <div>Jitter: <span id="jitterDisplay">--</span>ms</div>
+    <div>Users: <span id="userCount">--</span></div>
   </div>
 
   <div class="container">
-    <div id="adminBadge" class="admin-badge" style="display: none;">
-      👑 ADMIN CONTROLS - ULTRA LOW LATENCY MODE
-    </div>
+    <!-- Role badge -->
+    <div id="roleBadge" style="display: none;"></div>
 
     <h1>⚡ Harmony Sync</h1>
     <p class="subtitle">Zero-Delay Synchronized Music Experience</p>
 
+    <!-- Song Library (Admin only) -->
+    <div id="songLibrary" class="song-library" style="display: none;">
+      <h3 style="color: #ff6b6b; margin-bottom: 15px;">🎵 Song Library</h3>
+      <div id="songList"></div>
+    </div>
+
     <!-- Now Playing -->
     <div class="now-playing">
-      <div class="song-title" id="songTitle">Ultra Low Latency Test Track</div>
-      <div class="song-artist" id="songArtist">Precision Audio Labs</div>
+      <div class="song-title" id="songTitle">Select a song to get started</div>
+      <div class="song-artist" id="songArtist">Harmony Sync</div>
     </div>
 
     <!-- Audio Player -->
@@ -292,11 +401,21 @@
     <!-- Controls -->
     <div class="controls">
       <button id="playBtn" class="control-btn" style="display: none;">
-        ⚡ Instant Play
+        ⚡ Play
       </button>
       <button id="pauseBtn" class="control-btn" style="display: none;">
         ⏸️ Pause
       </button>
+      <button id="syncBtn" class="control-btn secondary" style="display: none;">
+        🔄 Force Sync
+      </button>
+    </div>
+
+    <!-- File Upload (Admin only) -->
+    <div id="fileUpload" class="file-upload" style="display: none;">
+      <h4 style="color: #4ecdc4; margin-bottom: 10px;">📁 Upload New Song</h4>
+      <input type="file" id="fileInput" accept="audio/*" style="margin-bottom: 10px;">
+      <button id="uploadBtn" class="upload-btn">Upload Song</button>
     </div>
 
     <!-- Volume Control -->
@@ -311,7 +430,7 @@
     </div>
 
     <p class="status" id="statusText">
-      ⚡ Ultra low latency mode active. Target: &lt;10ms sync precision
+      🔗 Connecting to Harmony Sync server...
     </p>
   </div>
 
@@ -319,7 +438,7 @@
   <script>
     // Ultra low latency configuration
     const socket = io({
-      transports: ['websocket'], // Force WebSocket for lowest latency
+      transports: ['websocket'],
       upgrade: false,
       pingTimeout: 5000,
       pingInterval: 2000
@@ -328,31 +447,37 @@
     // DOM elements
     const playBtn = document.getElementById("playBtn");
     const pauseBtn = document.getElementById("pauseBtn");
+    const syncBtn = document.getElementById("syncBtn");
     const audio = document.getElementById("audio");
     const volumeSlider = document.getElementById("volumeSlider");
     const disc = document.getElementById("disc");
     const statusText = document.getElementById("statusText");
     const syncStatus = document.getElementById("syncStatus");
-    const adminBadge = document.getElementById("adminBadge");
+    const connectionStatus = document.getElementById("connectionStatus");
+    const roleBadge = document.getElementById("roleBadge");
     const rttDisplay = document.getElementById("rttDisplay");
     const offsetDisplay = document.getElementById("offsetDisplay");
-    const jitterDisplay = document.getElementById("jitterDisplay");
+    const userCount = document.getElementById("userCount");
+    const songTitle = document.getElementById("songTitle");
+    const songArtist = document.getElementById("songArtist");
+    const songLibrary = document.getElementById("songLibrary");
+    const songList = document.getElementById("songList");
+    const fileUpload = document.getElementById("fileUpload");
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
 
-    // Ultra low latency variables
+    // State variables
     let isAdmin = false;
     let timeOffset = 0;
     let avgRTT = 0;
-    let jitter = 0;
-    let syncQuality = 'syncing';
     let rttHistory = [];
     let offsetHistory = [];
+    let connectedUsers = 0;
+    let currentSong = null;
+    let songs = [];
+    let selectedSongId = null;
 
-    // Set test audio (replace with your audio URL)
-    audio.src = "https://media.vocaroo.com/mp3/13vvld8kQ12W";
-    audio.volume = volumeSlider.value;
-    audio.preload = "auto";
-
-    // Ultra-precise timing functions
+    // High precision timing
     const getHighPrecisionTime = () => {
       return performance.now() + (performance.timeOrigin % 1);
     };
@@ -364,7 +489,6 @@
           return;
         }
         
-        // Use requestAnimationFrame for sub-millisecond precision
         if (ms < 16) {
           const start = performance.now();
           const frame = () => {
@@ -381,10 +505,10 @@
       });
     };
 
-    // Enhanced clock synchronization with multiple samples
+    // Clock synchronization
     async function performPrecisionSync() {
       const samples = [];
-      const SAMPLE_COUNT = 10;
+      const SAMPLE_COUNT = 5;
       
       for (let i = 0; i < SAMPLE_COUNT; i++) {
         const start = getHighPrecisionTime();
@@ -403,64 +527,46 @@
         
         samples.push({ rtt, offset });
         
-        // Small delay between samples to avoid overwhelming
         if (i < SAMPLE_COUNT - 1) {
-          await sleep(5);
+          await sleep(10);
         }
       }
       
-      // Calculate statistics
       const rtts = samples.map(s => s.rtt);
       const offsets = samples.map(s => s.offset);
       
-      // Use median for better accuracy (less affected by outliers)
       rtts.sort((a, b) => a - b);
       offsets.sort((a, b) => a - b);
       
       const medianRTT = rtts[Math.floor(rtts.length / 2)];
       const medianOffset = offsets[Math.floor(offsets.length / 2)];
       
-      // Update history for jitter calculation
       rttHistory.push(medianRTT);
       offsetHistory.push(medianOffset);
       
-      if (rttHistory.length > 20) {
+      if (rttHistory.length > 10) {
         rttHistory.shift();
         offsetHistory.shift();
       }
       
-      // Calculate jitter (standard deviation of RTT)
-      if (rttHistory.length > 1) {
-        const avgRTTLocal = rttHistory.reduce((a, b) => a + b) / rttHistory.length;
-        const variance = rttHistory.reduce((sum, rtt) => sum + Math.pow(rtt - avgRTTLocal, 2), 0) / rttHistory.length;
-        jitter = Math.sqrt(variance);
-      }
-      
-      // Apply offset
       timeOffset = medianOffset;
       avgRTT = medianRTT;
       
       // Update display
       rttDisplay.textContent = avgRTT.toFixed(1);
       offsetDisplay.textContent = timeOffset.toFixed(1);
-      jitterDisplay.textContent = jitter.toFixed(1);
       
-      // Update sync status
-      if (avgRTT < 10 && jitter < 2) {
-        syncQuality = 'excellent';
+      // Update sync quality
+      if (avgRTT < 15) {
         syncStatus.textContent = '⚡ Ultra Sync';
         syncStatus.className = 'sync-excellent';
-      } else if (avgRTT < 25 && jitter < 5) {
-        syncQuality = 'good';
+      } else if (avgRTT < 50) {
         syncStatus.textContent = '● Good Sync';
         syncStatus.className = 'sync-good';
       } else {
-        syncQuality = 'poor';
         syncStatus.textContent = '⚠ Poor Sync';
         syncStatus.className = 'sync-poor';
       }
-      
-      console.log(`🎯 Sync: RTT=${avgRTT.toFixed(1)}ms, Offset=${timeOffset.toFixed(1)}ms, Jitter=${jitter.toFixed(1)}ms`);
     }
 
     // Ultra-precise playback scheduling
@@ -469,18 +575,16 @@
       const now = getHighPrecisionTime();
       const delay = localTargetTime - now;
 
-      // Sync audio time with minimal tolerance
-      if (Math.abs(audio.currentTime - audioTime) > 0.001) { // 1ms tolerance
+      // Sync audio time
+      if (Math.abs(audio.currentTime - audioTime) > 0.01) {
         audio.currentTime = audioTime;
       }
 
       console.log(`🎵 Scheduling playback: delay=${delay.toFixed(2)}ms, audioTime=${audioTime.toFixed(3)}s`);
 
       if (delay > 1) {
-        // For delays > 1ms, use precise sleep
-        await sleep(delay - 0.5); // Pre-position 0.5ms early
+        await sleep(delay - 0.5);
         
-        // Final precise timing
         const finalCheck = () => {
           const remainingDelay = (serverTime - timeOffset) - getHighPrecisionTime();
           if (remainingDelay <= 0.5) {
@@ -494,8 +598,7 @@
         };
         requestAnimationFrame(finalCheck);
         
-      } else if (delay > -10) {
-        // Immediate play for small delays or slight lateness
+      } else if (delay > -50) {
         audio.play().then(() => {
           disc.classList.add('playing');
           console.log(`✅ Immediate playback (${delay.toFixed(2)}ms)`);
@@ -508,37 +611,95 @@
       }
     }
 
+    // Song library management
+    function updateSongLibrary() {
+      songList.innerHTML = '';
+      songs.forEach(song => {
+        const songItem = document.createElement('div');
+        songItem.className = `song-item ${selectedSongId === song.id ? 'selected' : ''}`;
+        songItem.innerHTML = `
+          <div class="song-info">
+            <h4>${song.title}</h4>
+            <p>${song.artist} • ${song.duration || 'Unknown'}</p>
+          </div>
+          <button onclick="selectSong(${song.id})" style="background: none; border: 1px solid #ff6b6b; color: #ff6b6b; padding: 5px 10px; border-radius: 15px; cursor: pointer;">
+            ${selectedSongId === song.id ? '✓ Selected' : 'Select'}
+          </button>
+        `;
+        songList.appendChild(songItem);
+      });
+    }
+
+    function selectSong(songId) {
+      if (!isAdmin) return;
+      
+      selectedSongId = songId;
+      const song = songs.find(s => s.id === songId);
+      if (!song) return;
+
+      // Update local display
+      songTitle.textContent = song.title;
+      songArtist.textContent = song.artist;
+      audio.src = song.url;
+      
+      // Notify server and other clients
+      socket.emit("songChange", {
+        title: song.title,
+        artist: song.artist,
+        url: song.url
+      });
+
+      updateSongLibrary();
+      statusText.textContent = `🎵 Selected: ${song.title} by ${song.artist}`;
+    }
+
+    // File upload
+    uploadBtn.onclick = async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a file first');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('songFile', file);
+      formData.append('title', prompt('Song title:') || file.name);
+      formData.append('artist', prompt('Artist name:') || 'Unknown Artist');
+
+      try {
+        const response = await fetch('/upload-song', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          statusText.textContent = '✅ Song uploaded successfully!';
+          fileInput.value = '';
+        } else {
+          statusText.textContent = '❌ Upload failed';
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        statusText.textContent = '❌ Upload error';
+      }
+    };
+
     // Volume control
     volumeSlider.oninput = (e) => {
       audio.volume = e.target.value;
     };
 
-    // Admin setup
-    socket.on("youAreAdmin", () => {
-      isAdmin = true;
-      playBtn.style.display = "inline-block";
-      pauseBtn.style.display = "inline-block";
-      adminBadge.style.display = "inline-block";
-      statusText.innerHTML = "⚡ You control ultra-low latency playback! Target: <10ms sync precision";
-    });
-
-    socket.on("youAreNotAdmin", () => {
-      isAdmin = false;
-      statusText.innerHTML = "⚡ Ultra low latency mode. Sync precision: <10ms";
-    });
-
-    // Ultra-precise play button
+    // Button handlers
     playBtn.onclick = async () => {
       if (!isAdmin) return;
       
       const localNow = getHighPrecisionTime();
       const serverNow = localNow + timeOffset;
-      
-      // Minimal delay - just enough for network transmission
-      const networkCompensation = Math.max(avgRTT * 0.6, 5); // 60% of RTT or 5ms minimum
+      const networkCompensation = Math.max(avgRTT * 0.6, 10);
       const playAtServer = serverNow + networkCompensation;
 
-      console.log(`🚀 Admin triggering ultra-low latency play: network_compensation=${networkCompensation.toFixed(1)}ms`);
+      console.log(`🚀 Admin triggering play: network_compensation=${networkCompensation.toFixed(1)}ms`);
 
       socket.emit("ultraPlayAt", {
         serverTimestamp: playAtServer,
@@ -548,7 +709,6 @@
       await scheduleUltraLowLatencyPlayback(playAtServer, audio.currentTime);
     };
 
-    // Pause button
     pauseBtn.onclick = () => {
       if (!isAdmin) return;
       socket.emit("ultraPause");
@@ -557,15 +717,80 @@
       console.log("⏸️ Admin paused playback");
     };
 
-    // Socket events
+    syncBtn.onclick = () => {
+      performPrecisionSync();
+      statusText.textContent = '🔄 Forcing synchronization...';
+    };
+
+    // Socket event handlers
+    socket.on('connect', () => {
+      console.log("🔗 Connected to server");
+      connectionStatus.innerHTML = '<span class="connected">🟢 Connected</span>';
+      statusText.textContent = '🎵 Connected to Harmony Sync!';
+      
+      // Start synchronization
+      performPrecisionSync();
+      setInterval(performPrecisionSync, 2000);
+    });
+
+    socket.on('disconnect', () => {
+      console.log("❌ Disconnected from server");
+      connectionStatus.innerHTML = '<span class="disconnected">🔴 Disconnected</span>';
+      statusText.textContent = '❌ Disconnected from server';
+      syncStatus.textContent = '❌ Disconnected';
+      syncStatus.className = 'sync-poor';
+    });
+
+    socket.on("youAreAdmin", () => {
+      isAdmin = true;
+      playBtn.style.display = "inline-block";
+      pauseBtn.style.display = "inline-block";
+      syncBtn.style.display = "inline-block";
+      songLibrary.style.display = "block";
+      fileUpload.style.display = "block";
+      roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control the music!</div>';
+      roleBadge.style.display = "block";
+      statusText.textContent = "👑 You are the admin! Control music playback for everyone.";
+    });
+
+    socket.on("youAreNotAdmin", () => {
+      isAdmin = false;
+      playBtn.style.display = "none";
+      pauseBtn.style.display = "none";
+      songLibrary.style.display = "none";
+      fileUpload.style.display = "none";
+      roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Enjoy the music!</div>';
+      roleBadge.style.display = "block";
+      statusText.textContent = "🎧 You're listening! The admin controls the music.";
+    });
+
+    socket.on("songsUpdated", (songData) => {
+      songs = songData;
+      updateSongLibrary();
+      console.log(`🎵 Updated song library: ${songs.length} songs`);
+    });
+
+    socket.on("songChange", (songData) => {
+      songTitle.textContent = songData.title;
+      songArtist.textContent = songData.artist;
+      if (songData.url) {
+        audio.src = songData.url;
+      }
+      console.log(`🎵 Song changed: ${songData.title} by ${songData.artist}`);
+    });
+
     socket.on("ultraPlayAt", async ({ serverTimestamp, audioTime }) => {
-      await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime);
+      if (!isAdmin) { // Only non-admins receive this
+        await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime);
+      }
     });
 
     socket.on("ultraPause", () => {
-      audio.pause();
-      disc.classList.remove('playing');
-      console.log("⏸️ Received pause command");
+      if (!isAdmin) { // Only non-admins receive this  
+        audio.pause();
+        disc.classList.remove('playing');
+        console.log("⏸️ Received pause command");
+      }
     });
 
     // Audio events
@@ -578,7 +803,7 @@
     });
 
     audio.addEventListener('canplaythrough', () => {
-      console.log("✅ Audio ready for ultra-low latency playback");
+      console.log("✅ Audio ready for playback");
     });
 
     audio.addEventListener('error', (e) => {
@@ -586,51 +811,11 @@
       statusText.textContent = '⚠️ Error loading audio file';
     });
 
-    // Start ultra-precise synchronization
-    const startUltraSyncMode = async () => {
-      console.log("🎯 Starting ultra-low latency sync mode...");
-      
-      // Initial sync
-      await performPrecisionSync();
-      
-      // Continuous high-frequency sync
-      setInterval(async () => {
-        await performPrecisionSync();
-      }, 1000); // Every 1 second for ultra-precision
-      
-      // Micro-adjustments every 100ms
-      setInterval(() => {
-        if (rttHistory.length > 5) {
-          const recentRTT = rttHistory.slice(-5).reduce((a, b) => a + b) / 5;
-          const recentOffset = offsetHistory.slice(-5).reduce((a, b) => a + b) / 5;
-          
-          // Small adjustment if drift detected
-          const drift = Math.abs(recentOffset - timeOffset);
-          if (drift > 0.5) {
-            timeOffset = recentOffset;
-            console.log(`🔧 Micro-adjustment: drift=${drift.toFixed(2)}ms`);
-          }
-        }
-      }, 100);
-    };
-
-    // Initialize when connected
-    socket.on('connect', () => {
-      console.log("🔗 Connected to ultra-low latency server");
-      startUltraSyncMode();
-    });
-
-    socket.on('disconnect', () => {
-      console.log("❌ Disconnected from server");
-      syncStatus.textContent = '❌ Disconnected';
-      syncStatus.className = 'sync-poor';
-    });
-
     // Keyboard shortcuts for admin
     document.addEventListener('keydown', (e) => {
       if (!isAdmin) return;
       
-      if (e.code === 'Space') {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
         e.preventDefault();
         if (audio.paused) {
           playBtn.click();
@@ -640,19 +825,12 @@
       }
     });
 
-    // Performance monitoring
-    let performanceStats = {
-      playLatencies: [],
-      syncDrifts: []
-    };
+    // Set default audio
+    audio.volume = volumeSlider.value;
+    audio.preload = "auto";
 
-    setInterval(() => {
-      if (performanceStats.playLatencies.length > 0) {
-        const avgLatency = performanceStats.playLatencies.reduce((a, b) => a + b) / performanceStats.playLatencies.length;
-        console.log(`📊 Avg play latency: ${avgLatency.toFixed(2)}ms`);
-        performanceStats.playLatencies = [];
-      }
-    }, 10000);
+    // Initialize
+    console.log("🎵 Harmony Sync Client Initialized");
   </script>
 </body>
 </html>
