@@ -288,7 +288,7 @@
       border-radius: 15px;
       padding: 20px;
       margin-bottom: 20px;
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
@@ -296,17 +296,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
-      margin: 5px 0;
+      padding: 15px;
+      margin: 8px 0;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
+      border: 1px solid transparent;
     }
 
     .song-item:hover {
       background: rgba(255, 107, 107, 0.1);
       transform: translateX(5px);
+      border-color: rgba(255, 107, 107, 0.3);
     }
 
     .song-item.selected {
@@ -321,17 +323,18 @@
 
     .song-info h4 {
       color: #ff6b6b;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
+      font-size: 1rem;
     }
 
     .song-info p {
       color: #b0b0b0;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .song-actions {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
     }
 
@@ -339,16 +342,18 @@
       background: none;
       border: 1px solid #ff6b6b;
       color: #ff6b6b;
-      padding: 5px 10px;
-      border-radius: 15px;
+      padding: 8px 15px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       transition: all 0.3s ease;
+      min-width: 80px;
     }
 
     .select-btn:hover {
       background: #ff6b6b;
       color: white;
+      transform: translateY(-2px);
     }
 
     .select-btn.selected {
@@ -360,40 +365,44 @@
       background: none;
       border: 1px solid #ff4757;
       color: #ff4757;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 0.7rem;
-      width: 24px;
-      height: 24px;
+      font-size: 0.8rem;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
+      opacity: 0.8;
     }
 
     .delete-btn:hover {
       background: #ff4757;
       color: white;
       transform: scale(1.1);
+      opacity: 1;
     }
 
     .uploaded-badge {
       background: #4ecdc4;
       color: white;
       font-size: 0.6rem;
-      padding: 2px 6px;
-      border-radius: 8px;
-      margin-left: 5px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 600;
     }
 
     .external-badge {
       background: #95a5a6;
       color: white;
       font-size: 0.6rem;
-      padding: 2px 6px;
-      border-radius: 8px;
-      margin-left: 5px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 600;
     }
 
     .connection-status {
@@ -511,6 +520,16 @@
       .control-btn {
         padding: 12px 20px;
         font-size: 1rem;
+      }
+
+      .song-actions {
+        gap: 8px;
+      }
+
+      .select-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        min-width: 70px;
       }
     }
   </style>
@@ -819,11 +838,19 @@
       }
     }
 
-    // Song library management WITH DELETE FUNCTIONALITY
+    // Song library management WITH FIXED DELETE FUNCTIONALITY
     function updateSongLibrary() {
+      console.log('🔄 Updating song library. Admin status:', isAdmin, 'Songs:', songs.length);
+      
       if (!songList) return;
       
       songList.innerHTML = '';
+      
+      if (songs.length === 0) {
+        songList.innerHTML = '<div style="color: #888; padding: 20px;">No songs available</div>';
+        return;
+      }
+      
       songs.forEach(song => {
         const songItem = document.createElement('div');
         songItem.className = `song-item ${selectedSongId === song.id ? 'selected' : ''}`;
@@ -831,6 +858,12 @@
         const badge = song.type === 'uploaded' 
           ? '<span class="uploaded-badge">UPLOADED</span>'
           : '<span class="external-badge">EXTERNAL</span>';
+
+        // Show delete button for ALL uploaded songs when user is admin
+        const deleteButton = (song.type === 'uploaded' && isAdmin) ? 
+          `<button class="delete-btn" onclick="deleteSong(${song.id}, '${song.title.replace(/'/g, "\\'")}')">
+             🗑️
+           </button>` : '';
 
         songItem.innerHTML = `
           <div class="song-info">
@@ -842,10 +875,7 @@
                     onclick="selectSong(${song.id})">
               ${selectedSongId === song.id ? '✓ Selected' : 'Select'}
             </button>
-            ${song.type === 'uploaded' && isAdmin ? 
-              `<button class="delete-btn" onclick="deleteSong(${song.id}, '${song.title.replace(/'/g, "\\'")}')">
-                 🗑️
-               </button>` : ''}
+            ${deleteButton}
           </div>
         `;
         songList.appendChild(songItem);
@@ -881,8 +911,10 @@
       statusText.textContent = `🎵 Selected: ${song.title} by ${song.artist}`;
     };
 
-    // DELETE SONG FUNCTIONALITY
+    // DELETE SONG FUNCTIONALITY - FIXED
     window.deleteSong = function(songId, songTitle) {
+      console.log('🗑️ Delete song called:', songId, songTitle, 'Admin:', isAdmin);
+      
       if (!isAdmin) {
         statusText.textContent = '❌ Only admin can delete songs';
         return;
@@ -891,24 +923,43 @@
       songToDelete = songId;
       deleteTitle.textContent = songTitle;
       deleteModal.style.display = 'block';
+      console.log('🗑️ Delete modal opened for:', songTitle);
     };
 
     window.cancelDelete = function() {
+      console.log('🗑️ Delete cancelled');
       deleteModal.style.display = 'none';
       songToDelete = null;
     };
 
     window.confirmDelete = async function() {
-      if (!songToDelete) return;
+      if (!songToDelete) {
+        console.log('🗑️ No song to delete');
+        return;
+      }
+
+      console.log('🗑️ Confirming delete for song ID:', songToDelete);
 
       try {
+        statusText.textContent = '🗑️ Deleting song...';
+        
         const response = await fetch(`/api/songs/${songToDelete}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
+
+        console.log('🗑️ Delete response status:', response.status);
 
         if (response.ok) {
           const result = await response.json();
+          console.log('🗑️ Delete result:', result);
+          
           statusText.textContent = '✅ Song deleted successfully!';
+          
+          // Remove from local songs array
+          songs = songs.filter(song => song.id !== songToDelete);
           
           // If we deleted the currently selected song, reset selection
           if (selectedSongId === songToDelete) {
@@ -926,12 +977,16 @@
             });
           }
           
+          // Update the song library display
+          updateSongLibrary();
+          
         } else {
           const error = await response.json();
+          console.error('🗑️ Delete failed:', error);
           statusText.textContent = `❌ Delete failed: ${error.error}`;
         }
       } catch (error) {
-        console.error('Delete error:', error);
+        console.error('🗑️ Delete error:', error);
         statusText.textContent = '❌ Delete failed: Network error';
       }
 
@@ -961,6 +1016,8 @@
       formData.append('artist', prompt('Artist name:') || 'Unknown Artist');
 
       try {
+        statusText.textContent = '📤 Uploading song...';
+        
         const response = await fetch('/upload-song', {
           method: 'POST',
           body: formData
@@ -970,12 +1027,18 @@
           const result = await response.json();
           statusText.textContent = '✅ Song uploaded successfully!';
           fileInput.value = '';
+          
+          // Add to local songs array
+          songs.push(result.song);
+          updateSongLibrary();
+          
         } else {
-          statusText.textContent = '❌ Upload failed';
+          const error = await response.json();
+          statusText.textContent = `❌ Upload failed: ${error.error}`;
         }
       } catch (error) {
         console.error('Upload error:', error);
-        statusText.textContent = '❌ Upload error';
+        statusText.textContent = '❌ Upload error: Network error';
       }
     };
 
@@ -1081,6 +1144,7 @@
     });
 
     socket.on("youAreAdmin", () => {
+      console.log('👑 You are now admin!');
       isAdmin = true;
       playBtn.style.display = "inline-block";
       pauseBtn.style.display = "inline-block";
@@ -1090,9 +1154,13 @@
       roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
       roleBadge.style.display = "block";
       statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+      
+      // Update song library to show delete buttons
+      updateSongLibrary();
     });
 
     socket.on("youAreNotAdmin", () => {
+      console.log('👤 You are a regular user');
       isAdmin = false;
       playBtn.style.display = "none";
       pauseBtn.style.display = "none";
@@ -1105,9 +1173,9 @@
     });
 
     socket.on("songsUpdated", (songData) => {
+      console.log('🎵 Songs updated from server:', songData.length, 'songs');
       songs = songData;
       updateSongLibrary();
-      console.log(`🎵 Updated song library: ${songs.length} songs`);
     });
 
     socket.on("songChange", (songData) => {
@@ -1279,13 +1347,6 @@
         updateTimelineDisplay();
       }
     }, 100);
-
-    // Initialize with default song for testing
-    setTimeout(() => {
-      if (songs.length > 0 && isAdmin) {
-        window.selectSong(songs[0].id);
-      }
-    }, 1000);
 
     // Initialize
     console.log("🎵 Zero-Delay Harmony Sync Client Initialized");
