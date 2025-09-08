@@ -26,13 +26,14 @@ const io = new Server(server, {
 // MUSIC API INTEGRATION
 async function searchSongs(query, limit = 20) {
   try {
-    const response = await axios.get('https://saavn.dev/search', {
-      params: { q: query, limit },
+    // JioSaavn API (100% FREE - No key needed)
+    const response = await axios.get('https://jiosaavn-api-privatecvc.vercel.app/api/search/songs', {
+      params: { query, limit },
       timeout: 5000
     });
 
-    if (response.data?.results) {
-      return response.data.results.map(song => ({
+    if (response.data?.data?.results) {
+      return response.data.data.results.map(song => ({
         id: `api_${song.id}`,
         title: song.name || song.title,
         artist: song.primaryArtists || 'Unknown Artist',
@@ -48,7 +49,6 @@ async function searchSongs(query, limit = 20) {
     return [];
   }
 }
-
 
 // Add search endpoint
 app.get('/api/search', async (req, res) => {
