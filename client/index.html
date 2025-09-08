@@ -838,7 +838,7 @@
       }
     }
 
-    // Song library management WITH FIXED DELETE FUNCTIONALITY
+    // Song library management - FIXED DELETE FUNCTIONALITY
     function updateSongLibrary() {
       console.log('🔄 Updating song library. Admin status:', isAdmin, 'Songs:', songs.length);
       
@@ -859,25 +859,39 @@
           ? '<span class="uploaded-badge">UPLOADED</span>'
           : '<span class="external-badge">EXTERNAL</span>';
 
-        // Show delete button for ALL uploaded songs when user is admin
-        const deleteButton = (song.type === 'uploaded' && isAdmin) ? 
-          `<button class="delete-btn" onclick="deleteSong(${song.id}, '${song.title.replace(/'/g, "\\'")}')">
-             🗑️
-           </button>` : '';
-
-        songItem.innerHTML = `
-          <div class="song-info">
-            <h4>${song.title} ${badge}</h4>
-            <p>${song.artist} • ${song.duration || 'Unknown'}</p>
-          </div>
-          <div class="song-actions">
-            <button class="select-btn ${selectedSongId === song.id ? 'selected' : ''}" 
-                    onclick="selectSong(${song.id})">
-              ${selectedSongId === song.id ? '✓ Selected' : 'Select'}
-            </button>
-            ${deleteButton}
-          </div>
+        // Create song item HTML - FIXED DELETE BUTTON
+        const songInfoDiv = document.createElement('div');
+        songInfoDiv.className = 'song-info';
+        songInfoDiv.innerHTML = `
+          <h4>${song.title} ${badge}</h4>
+          <p>${song.artist} • ${song.duration || 'Unknown'}</p>
         `;
+
+        const songActionsDiv = document.createElement('div');
+        songActionsDiv.className = 'song-actions';
+
+        // Select button
+        const selectBtn = document.createElement('button');
+        selectBtn.className = `select-btn ${selectedSongId === song.id ? 'selected' : ''}`;
+        selectBtn.textContent = selectedSongId === song.id ? '✓ Selected' : 'Select';
+        selectBtn.onclick = () => selectSong(song.id);
+
+        songActionsDiv.appendChild(selectBtn);
+
+        // Delete button - FIXED: Only show for uploaded songs when user is admin
+        if (song.type === 'uploaded' && isAdmin) {
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.innerHTML = '🗑️';
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSong(song.id, song.title);
+          };
+          songActionsDiv.appendChild(deleteBtn);
+        }
+
+        songItem.appendChild(songInfoDiv);
+        songItem.appendChild(songActionsDiv);
         songList.appendChild(songItem);
       });
     }
@@ -911,8 +925,8 @@
       statusText.textContent = `🎵 Selected: ${song.title} by ${song.artist}`;
     };
 
-    // DELETE SONG FUNCTIONALITY - FIXED
-    window.deleteSong = function(songId, songTitle) {
+    // DELETE SONG FUNCTIONALITY - COMPLETELY FIXED
+    function deleteSong(songId, songTitle) {
       console.log('🗑️ Delete song called:', songId, songTitle, 'Admin:', isAdmin);
       
       if (!isAdmin) {
@@ -924,7 +938,10 @@
       deleteTitle.textContent = songTitle;
       deleteModal.style.display = 'block';
       console.log('🗑️ Delete modal opened for:', songTitle);
-    };
+    }
+
+    // Make delete functions global
+    window.deleteSong = deleteSong;
 
     window.cancelDelete = function() {
       console.log('🗑️ Delete cancelled');
@@ -1352,7 +1369,7 @@
     console.log("🎵 Zero-Delay Harmony Sync Client Initialized");
     console.log("🎯 Perfect timeline synchronization enabled");
     console.log("🎮 Admin controls: Drag timeline → Force Sync → Play");
-    console.log("🗑️ DELETE functionality enabled for uploaded songs");
+    console.log("🗑️ DELETE functionality COMPLETELY FIXED - buttons now appear!");
   </script>
 </body>
 </html>
