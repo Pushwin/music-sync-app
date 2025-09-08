@@ -157,3 +157,37 @@ h1 {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* --- Song List & Delete Button Styles --- */
+#library {
+  margin-top: 25px;
+  padding: 15px;
+  background: #ffffff10;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #00000050;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.song-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  margin: 6px 0;
+  background: #ffffff15;
+  border-radius: 8px;
+}
+
+.delete-btn {
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-left: 10px;
+  color: #ff5c8a;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
+  color: #ff2f5c;
+}
