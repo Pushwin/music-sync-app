@@ -19,6 +19,7 @@
   "author": "Harmony Sync Team",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.11.0",
     "express": "^5.1.0",
     "multer": "^1.4.5-lts.1",
     "socket.io": "^4.8.1"

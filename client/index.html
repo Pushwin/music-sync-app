@@ -42,6 +42,8 @@
       border-radius: 30px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-height: 95vh;
+      overflow-y: auto;
     }
 
     h1 {
@@ -290,6 +292,58 @@
       margin-bottom: 20px;
       max-height: 250px;
       overflow-y: auto;
+    }
+
+    .music-search {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-btn {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    .search-result {
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .search-result:hover {
+      background: rgba(255,107,107,0.1);
+      transform: translateX(5px);
     }
 
     .song-item {
@@ -577,6 +631,16 @@
       <div id="songList"></div>
     </div>
 
+    <!-- Music Search (Admin only) -->
+    <div id="musicSearch" class="music-search" style="display: none;">
+      <h3 style="color: #4ecdc4; margin-bottom: 15px;">🔍 Search Songs</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search songs..." />
+        <button id="searchBtn" class="search-btn">Search</button>
+      </div>
+      <div id="searchResults" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
     <!-- Now Playing -->
     <div class="now-playing">
       <div class="song-title" id="songTitle">Select a song to get started</div>
@@ -664,6 +728,10 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const deleteModal = document.getElementById("deleteModal");
     const deleteTitle = document.getElementById("deleteTitle");
+    const musicSearch = document.getElementById("musicSearch");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchResults = document.getElementById("searchResults");
 
     // State variables
     let isAdmin = false;
@@ -679,6 +747,7 @@
     let isSyncing = false;
     let isPlaying = false;
     let songToDelete = null;
+    let searchResultsData = [];
 
     // High precision timing
     const getHighPrecisionTime = () => {
@@ -836,6 +905,65 @@
           isPlaying = true;
         });
       }
+    }
+
+    // MUSIC SEARCH FUNCTIONALITY
+    async function searchMusic(query) {
+      if (!query.trim()) return;
+      
+      searchBtn.textContent = 'Searching...';
+      searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #4ecdc4;">🎵 Searching...</div>';
+      
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.success && data.results.length > 0) {
+          displaySearchResults(data.results);
+        } else {
+          searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No songs found</div>';
+        }
+      } catch (error) {
+        searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff6b6b;">Search failed</div>';
+      }
+      
+      searchBtn.textContent = 'Search';
+    }
+
+    function displaySearchResults(results) {
+      searchResults.innerHTML = results.map(song => `
+        <div class="search-result" onclick="selectApiSong('${song.id}')">
+          <div>
+            <div style="color: #ff6b6b; font-weight: bold;">${song.title}</div>
+            <div style="color: #b0b0b0; font-size: 0.9rem;">${song.artist}</div>
+          </div>
+          <div style="color: #4ecdc4; font-size: 0.8rem;">${song.duration}</div>
+        </div>
+      `).join('');
+      searchResultsData = results;
+    }
+
+    function selectApiSong(songId) {
+      if (!isAdmin) return;
+      
+      const song = searchResultsData.find(s => s.id === songId);
+      if (!song) return;
+      
+      // Update display
+      songTitle.textContent = song.title;
+      songArtist.textContent = song.artist;
+      audio.src = song.url;
+      audio.currentTime = 0;
+      
+      // Notify other clients
+      socket.emit("songChange", {
+        title: song.title,
+        artist: song.artist,
+        url: song.url,
+        audioTime: 0
+      });
+      
+      statusText.textContent = `🎵 Selected: ${song.title}`;
     }
 
     // Song library management - FIXED DELETE FUNCTIONALITY
@@ -1059,6 +1187,14 @@
       }
     };
 
+    // Search event listeners
+    if (searchBtn && searchInput) {
+      searchBtn.onclick = () => searchMusic(searchInput.value);
+      searchInput.onkeypress = (e) => {
+        if (e.key === 'Enter') searchMusic(searchInput.value);
+      };
+    }
+
     // Volume control
     volumeSlider.oninput = (e) => {
       audio.volume = e.target.value;
@@ -1168,6 +1304,7 @@
       syncBtn.style.display = "inline-block";
       songLibrary.style.display = "block";
       fileUpload.style.display = "block";
+      musicSearch.style.display = "block"; // Show search for admin
       roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
       roleBadge.style.display = "block";
       statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
@@ -1184,6 +1321,7 @@
       songLibrary.style.display = "none";
       fileUpload.style.display = "none";
       syncBtn.style.display = "none";
+      musicSearch.style.display = "none"; // Hide search for non-admin
       roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Timeline auto-syncs!</div>';
       roleBadge.style.display = "block";
       statusText.textContent = "🎧 Timeline will auto-sync when admin uses Force Sync!";
@@ -1369,6 +1507,7 @@
     console.log("🎵 Zero-Delay Harmony Sync Client Initialized");
     console.log("🎯 Perfect timeline synchronization enabled");
     console.log("🎮 Admin controls: Drag timeline → Force Sync → Play");
+    console.log("🔍 Music search functionality enabled");
     console.log("🗑️ DELETE functionality COMPLETELY FIXED - buttons now appear!");
   </script>
 </body>

@@ -5,6 +5,7 @@ const { performance } = require("perf_hooks");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
+const axios = require('axios'); // Add this line
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +21,42 @@ const io = new Server(server, {
   transports: ['websocket'], // Force WebSocket for lowest latency
   compression: false,       // Disable compression for speed
   allowEIO3: false
+});
+
+// MUSIC API INTEGRATION
+async function searchSongs(query, limit = 20) {
+  try {
+    // JioSaavn API (100% FREE - No key needed)
+    const response = await axios.get('https://jiosaavn-api-privatecvc.vercel.app/api/search/songs', {
+      params: { query, limit },
+      timeout: 5000
+    });
+
+    if (response.data?.data?.results) {
+      return response.data.data.results.map(song => ({
+        id: `api_${song.id}`,
+        title: song.name || song.title,
+        artist: song.primaryArtists || 'Unknown Artist',
+        duration: formatTime(song.duration || 0),
+        url: song.downloadUrl?.[4]?.link || song.media_preview_url,
+        type: 'api',
+        source: 'JioSaavn'
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('🎵 Search failed:', error.message);
+    return [];
+  }
+}
+
+// Add search endpoint
+app.get('/api/search', async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: 'Query required' });
+  
+  const results = await searchSongs(q);
+  res.json({ success: true, results });
 });
 
 // Create uploads directory if it doesn't exist
@@ -456,10 +493,12 @@ server.listen(PORT, () => {
   console.log(`   • Zero-delay playback sync`);
   console.log(`   • Perfect timeline position sync`);
   console.log(`   • Force sync any timeline position`);
+  console.log(`   • Music search API integration`);
   console.log(`   • WebSocket-only, TCP_NODELAY enabled`);
   console.log(`📁 Upload directory: ${uploadsDir}`);
   console.log(`\n💡 Optimization: Run with 'node --expose-gc --max-old-space-size=512 index.js'`);
   console.log(`🎮 Admin Controls:`);
+  console.log(`   • Search songs from JioSaavn`);
   console.log(`   • Drag timeline → Force Sync = Perfect position sync`);
   console.log(`   • Play = All devices start simultaneously`);
   console.log(`   • Pause = All devices pause at exact same position`);
