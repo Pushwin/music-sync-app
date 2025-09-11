@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>🎵 Harmony Sync - Zero Delay Perfect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      z-index: 2;
+      text-align: center;
+      padding: 40px;
+      width: 90%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #e0e0e0;
+      font-weight: 300;
+    }
+
+    .now-playing {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .song-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ff6b6b;
+      margin-bottom: 5px;
+    }
+
+    .song-artist {
+      font-size: 0.9rem;
+      color: #b0b0b0;
+    }
+
+    .timeline-info {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #4ecdc4;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    audio {
+      width: 100%;
+      margin-bottom: 25px;
+      border-radius: 15px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      color: white;
+      box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .control-btn.secondary {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+    }
+
+    .control-btn.secondary:hover {
+      box-shadow: 0 15px 35px rgba(78, 205, 196, 0.4);
+    }
+
+    .sync-btn {
+      background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+      color: #000 !important;
+      box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3) !important;
+      font-weight: 800;
+    }
+
+    .sync-btn:hover {
+      box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5) !important;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .volume-icon {
+      font-size: 1.2rem;
+      color: #ff6b6b;
+    }
+
+    .volume-slider {
+      width: 120px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    }
+
+    .disc-container {
+      margin: 30px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .disc {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #333 30%, #666 40%, #222 70%, #111 100%);
+      border: 3px solid #ff6b6b;
+      position: relative;
+      animation: spin 3s linear infinite paused;
+      box-shadow: 0 0 30px rgba(255, 107, 107, 0.4);
+    }
+
+    .disc.playing {
+      animation-play-state: running;
+    }
+
+    .disc::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 15px 35px rgba(255, 215, 0, 0.8); }
+      100% { transform: scale(1); box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3); }
+    }
+
+    .status {
+      font-size: 0.95rem;
+      color: #e0e0e0;
+      opacity: 0.8;
+      font-style: italic;
+      margin-top: 20px;
+    }
+
+    .sync-status {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .sync-excellent { color: #00ff88; }
+    .sync-good { color: #4ecdc4; }
+    .sync-poor { color: #ff6b6b; }
+
+    .latency-info {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #000;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .user-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .song-library {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .music-search {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-btn {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    .search-result {
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .search-result:hover {
+      background: rgba(255,107,107,0.1);
+      transform: translateX(5px);
+    }
+
+    .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .song-item:hover {
+      background: rgba(255, 107, 107, 0.1);
+      transform: translateX(5px);
+      border-color: rgba(255, 107, 107, 0.3);
+    }
+
+    .song-item.selected {
+      background: rgba(255, 107, 107, 0.2);
+      border: 1px solid rgba(255, 107, 107, 0.5);
+    }
+
+    .song-info {
+      text-align: left;
+      flex-grow: 1;
+    }
+
+    .song-info h4 {
+      color: #ff6b6b;
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+
+    .song-info p {
+      color: #b0b0b0;
+      font-size: 0.85rem;
+    }
+
+    .song-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .select-btn {
+      background: none;
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+
+    .select-btn:hover {
+      background: #ff6b6b;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .select-btn.selected {
+      background: #ff6b6b;
+      color: white;
+    }
+
+    .delete-btn {
+      background: none;
+      border: 1px solid #ff4757;
+      color: #ff4757;
+      padding: 6px 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.8rem;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      opacity: 0.8;
+    }
+
+    .delete-btn:hover {
+      background: #ff4757;
+      color: white;
+      transform: scale(1.1);
+      opacity: 1;
+    }
+
+    .uploaded-badge {
+      background: #4ecdc4;
+      color: white;
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+
+    .external-badge {
+      background: #95a5a6;
+      color: white;
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+
+    .connection-status {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .connected { color: #00ff88; }
+    .disconnected { color: #ff6b6b; }
+
+    .file-upload {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    /* Modal for delete confirmation */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(15, 12, 41, 0.95), rgba(36, 36, 62, 0.95));
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 20px;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal h3 {
+      color: #ff6b6b;
+      margin-bottom: 15px;
+    }
+
+    .modal p {
+      color: #e0e0e0;
+      margin-bottom: 20px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .modal-btn.cancel {
+      background: #6c757d;
+      color: white;
+    }
+
+    .modal-btn.delete {
+      background: linear-gradient(135deg, #ff4757, #ff3742);
+      color: white;
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+        margin: 20px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .controls {
+        gap: 15px;
+      }
+
+      .control-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+
+      .song-actions {
+        gap: 8px;
+      }
+
+      .select-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        min-width: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Delete confirmation modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <h3>🗑️ Delete Song</h3>
+      <p>Are you sure you want to delete "<span id="deleteTitle"></span>"?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="cancelDelete()">Cancel</button>
+        <button class="modal-btn delete" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection status indicator -->
+  <div class="connection-status">
+    <span id="connectionStatus" class="disconnected">🔴 Connecting...</span>
+  </div>
+
+  <!-- Sync status indicator -->
+  <div class="sync-status">
+    <span id="syncStatus" class="sync-good">● Syncing...</span>
+  </div>
+
+  <!-- Latency info -->
+  <div class="latency-info">
+    <div>RTT: <span id="rttDisplay">--</span>ms</div>
+    <div>Offset: <span id="offsetDisplay">--</span>ms</div>
+    <div>Users: <span id="userCount">--</span></div>
+  </div>
+
+  <div class="container">
+    <!-- Role badge -->
+    <div id="roleBadge" style="display: none;"></div>
+
+    <h1>⚡ Harmony Sync</h1>
+    <p class="subtitle">Zero-Delay Perfect Timeline Synchronization</p>
+
+    <!-- Song Library (Admin only) -->
+    <div id="songLibrary" class="song-library" style="display: none;">
+      <h3 style="color: #ff6b6b; margin-bottom: 15px;">🎵 Song Library</h3>
+      <div id="songList"></div>
+    </div>
+
+    <!-- Music Search (Admin only) -->
+    <div id="musicSearch" class="music-search" style="display: none;">
+      <h3 style="color: #4ecdc4; margin-bottom: 15px;">🔍 Search Songs</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search songs..." />
+        <button id="searchBtn" class="search-btn">Search</button>
+      </div>
+      <div id="searchResults" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- Now Playing -->
+    <div class="now-playing">
+      <div class="song-title" id="songTitle">Select a song to get started</div>
+      <div class="song-artist" id="songArtist">Harmony Sync</div>
+      <div class="timeline-info" id="timelineInfo">Timeline: 0:00 / 0:00</div>
+    </div>
+
+    <!-- Audio Player -->
+    <audio id="audio" controls preload="auto"></audio>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="playBtn" class="control-btn" style="display: none;">
+        ⚡ Play Sync
+      </button>
+      <button id="pauseBtn" class="control-btn" style="display: none;">
+        ⏸️ Pause All
+      </button>
+      <button id="syncBtn" class="control-btn sync-btn" style="display: none;">
+        🎯 Force Timeline Sync
+      </button>
+    </div>
+
+    <!-- File Upload (Admin only) -->
+    <div id="fileUpload" class="file-upload" style="display: none;">
+      <h4 style="color: #4ecdc4; margin-bottom: 10px;">📁 Upload New Song</h4>
+      <input type="file" id="fileInput" accept="audio/*" style="margin-bottom: 10px;">
+      <button id="uploadBtn" class="upload-btn">Upload Song</button>
+    </div>
+
+    <!-- Volume Control -->
+    <div class="volume-container">
+      <span class="volume-icon">🔊</span>
+      <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.7" />
+    </div>
+
+    <!-- Spinning Disc -->
+    <div class="disc-container">
+      <div id="disc" class="disc"></div>
+    </div>
+
+    <p class="status" id="statusText">
+      🔗 Connecting to Harmony Sync server...
+    </p>
+  </div>
+
+  <!-- Load Socket.IO first -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+  <script>
+    // Check if socket.io loaded
+    if (typeof io === 'undefined') {
+      document.getElementById('statusText').textContent = '❌ Failed to load Socket.IO. Please refresh.';
+      throw new Error('Socket.IO not loaded');
+    }
+
+    // Ultra low latency configuration
+    const socket = io({
+      transports: ['websocket'],
+      upgrade: false,
+      pingTimeout: 5000,
+      pingInterval: 2000
+    });
+
+    // DOM elements
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const syncBtn = document.getElementById("syncBtn");
+    const audio = document.getElementById("audio");
+    const volumeSlider = document.getElementById("volumeSlider");
+    const disc = document.getElementById("disc");
+    const statusText = document.getElementById("statusText");
+    const syncStatus = document.getElementById("syncStatus");
+    const connectionStatus = document.getElementById("connectionStatus");
+    const roleBadge = document.getElementById("roleBadge");
+    const rttDisplay = document.getElementById("rttDisplay");
+    const offsetDisplay = document.getElementById("offsetDisplay");
+    const userCount = document.getElementById("userCount");
+    const songTitle = document.getElementById("songTitle");
+    const songArtist = document.getElementById("songArtist");
+    const timelineInfo = document.getElementById("timelineInfo");
+    const songLibrary = document.getElementById("songLibrary");
+    const songList = document.getElementById("songList");
+    const fileUpload = document.getElementById("fileUpload");
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const deleteModal = document.getElementById("deleteModal");
+    const deleteTitle = document.getElementById("deleteTitle");
+    const musicSearch = document.getElementById("musicSearch");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchResults = document.getElementById("searchResults");
+
+    // State variables
+    let isAdmin = false;
+    let timeOffset = 0;
+    let avgRTT = 0;
+    let rttHistory = [];
+    let offsetHistory = [];
+    let connectedUsers = 0;
+    let currentSong = null;
+    let songs = [];
+    let selectedSongId = null;
+    let lastSyncedTime = 0;
+    let isSyncing = false;
+    let isPlaying = false;
+    let songToDelete = null;
+    let searchResultsData = [];
+
+    // High precision timing
+    const getHighPrecisionTime = () => {
+      return performance.now() + (performance.timeOrigin % 1);
+    };
+
+    const sleep = (ms) => {
+      return new Promise(resolve => {
+        if (ms <= 0) {
+          resolve();
+          return;
+        }
+        
+        if (ms < 16) {
+          const start = performance.now();
+          const frame = () => {
+            if (performance.now() - start >= ms) {
+              resolve();
+            } else {
+              requestAnimationFrame(frame);
+            }
+          };
+          requestAnimationFrame(frame);
+        } else {
+          setTimeout(resolve, ms);
+        }
+      });
+    };
+
+    // Format time for display
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Update timeline display
+    function updateTimelineDisplay() {
+      if (audio.duration && !isNaN(audio.duration)) {
+        const current = formatTime(audio.currentTime);
+        const total = formatTime(audio.duration);
+        timelineInfo.textContent = `Timeline: ${current} / ${total}`;
+      }
+    }
+
+    // Clock synchronization
+    async function performPrecisionSync() {
+      const samples = [];
+      const SAMPLE_COUNT = 5;
+      
+      for (let i = 0; i < SAMPLE_COUNT; i++) {
+        const start = getHighPrecisionTime();
+        
+        const response = await new Promise(resolve => {
+          socket.emit("ultraPingTime", start);
+          socket.once("ultraPongTime", (serverNow, clientStart) => {
+            const end = getHighPrecisionTime();
+            resolve({ serverNow, clientStart, end });
+          });
+        });
+        
+        const rtt = response.end - response.clientStart;
+        const serverTimeAtReceive = response.serverNow + (rtt / 2);
+        const offset = serverTimeAtReceive - response.end;
+        
+        samples.push({ rtt, offset });
+        
+        if (i < SAMPLE_COUNT - 1) {
+          await sleep(10);
+        }
+      }
+      
+      const rtts = samples.map(s => s.rtt);
+      const offsets = samples.map(s => s.offset);
+      
+      rtts.sort((a, b) => a - b);
+      offsets.sort((a, b) => a - b);
+      
+      const medianRTT = rtts[Math.floor(rtts.length / 2)];
+      const medianOffset = offsets[Math.floor(offsets.length / 2)];
+      
+      rttHistory.push(medianRTT);
+      offsetHistory.push(medianOffset);
+      
+      if (rttHistory.length > 10) {
+        rttHistory.shift();
+        offsetHistory.shift();
+      }
+      
+      timeOffset = medianOffset;
+      avgRTT = medianRTT;
+      
+      // Update display
+      rttDisplay.textContent = avgRTT.toFixed(1);
+      offsetDisplay.textContent = timeOffset.toFixed(1);
+      
+      // Update sync quality
+      if (avgRTT < 15) {
+        syncStatus.textContent = '⚡ Perfect Sync';
+        syncStatus.className = 'sync-excellent';
+      } else if (avgRTT < 50) {
+        syncStatus.textContent = '● Good Sync';
+        syncStatus.className = 'sync-good';
+      } else {
+        syncStatus.textContent = '⚠ Poor Sync';
+        syncStatus.className = 'sync-poor';
+      }
+    }
+
+    // Ultra-precise playback scheduling
+    async function scheduleUltraLowLatencyPlayback(serverTime, audioTime = 0, forceSeek = true) {
+      const localTargetTime = serverTime - timeOffset;
+      const now = getHighPrecisionTime();
+      const delay = localTargetTime - now;
+
+      console.log(`🎵 Scheduling playback: delay=${delay.toFixed(2)}ms, audioTime=${audioTime.toFixed(3)}s`);
+
+      // Force seek to exact position if needed
+      if (forceSeek && Math.abs(audio.currentTime - audioTime) > 0.02) {
+        audio.currentTime = audioTime;
+        lastSyncedTime = audioTime;
+        console.log(`🎯 Seeking to: ${audioTime.toFixed(3)}s`);
+      }
+
+      if (delay > 1) {
+        await sleep(delay - 0.5);
+        
+        const finalCheck = () => {
+          const remainingDelay = (serverTime - timeOffset) - getHighPrecisionTime();
+          if (remainingDelay <= 0.5) {
+            audio.play().then(() => {
+              disc.classList.add('playing');
+              isPlaying = true;
+              console.log(`✅ Perfect sync playback: ${remainingDelay.toFixed(2)}ms precision`);
+            });
+          } else {
+            requestAnimationFrame(finalCheck);
+          }
+        };
+        requestAnimationFrame(finalCheck);
+        
+      } else if (delay > -50) {
+        audio.play().then(() => {
+          disc.classList.add('playing');
+          isPlaying = true;
+          console.log(`✅ Immediate playback (${delay.toFixed(2)}ms)`);
+        });
+      } else {
+        console.log(`⚠ Compensating for late start: ${delay.toFixed(2)}ms`);
+        if (audioTime - delay/1000 > 0) {
+          audio.currentTime = audioTime - delay/1000;
+        }
+        audio.play().then(() => {
+          disc.classList.add('playing');
+          isPlaying = true;
+        });
+      }
+    }
+
+    // MUSIC SEARCH FUNCTIONALITY
+    async function searchMusic(query) {
+      if (!query.trim()) return;
+      
+      searchBtn.textContent = 'Searching...';
+      searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #4ecdc4;">🎵 Searching...</div>';
+      
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.success && data.results.length > 0) {
+          displaySearchResults(data.results);
+        } else {
+          searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No songs found</div>';
+        }
+      } catch (error) {
+        searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff6b6b;">Search failed</div>';
+      }
+      
+      searchBtn.textContent = 'Search';
+    }
+
+    function displaySearchResults(results) {
+      searchResults.innerHTML = results.map(song => `
+        <div class="search-result" onclick="selectApiSong('${song.id}')">
+          <div>
+            <div style="color: #ff6b6b; font-weight: bold;">${song.title}</div>
+            <div style="color: #b0b0b0; font-size: 0.9rem;">${song.artist}</div>
+          </div>
+          <div style="color: #4ecdc4; font-size: 0.8rem;">${song.duration}</div>
+        </div>
+      `).join('');
+      searchResultsData = results;
+    }
+
+    function selectApiSong(songId) {
+      if (!isAdmin) return;
+      
+      const song = searchResultsData.find(s => s.id === songId);
+      if (!song) return;
+      
+      // Update display
+      songTitle.textContent = song.title;
+      songArtist.textContent = song.artist;
+      audio.src = song.url;
+      audio.currentTime = 0;
+      
+      // Notify other clients
+      socket.emit("songChange", {
+        title: song.title,
+        artist: song.artist,
+        url: song.url,
+        audioTime: 0
+      });
+      
+      statusText.textContent = `🎵 Selected: ${song.title}`;
+    }
+
+    // Song library management - FIXED DELETE FUNCTIONALITY
+    function updateSongLibrary() {
+      console.log('🔄 Updating song library. Admin status:', isAdmin, 'Songs:', songs.length);
+      
+      if (!songList) return;
+      
+      songList.innerHTML = '';
+      
+      if (songs.length === 0) {
+        songList.innerHTML = '<div style="color: #888; padding: 20px;">No songs available</div>';
+        return;
+      }
+      
+      songs.forEach(song => {
+        const songItem = document.createElement('div');
+        songItem.className = `song-item ${selectedSongId === song.id ? 'selected' : ''}`;
+        
+        const badge = song.type === 'uploaded' 
+          ? '<span class="uploaded-badge">UPLOADED</span>'
+          : '<span class="external-badge">EXTERNAL</span>';
+
+        // Create song item HTML - FIXED DELETE BUTTON
+        const songInfoDiv = document.createElement('div');
+        songInfoDiv.className = 'song-info';
+        songInfoDiv.innerHTML = `
+          <h4>${song.title} ${badge}</h4>
+          <p>${song.artist} • ${song.duration || 'Unknown'}</p>
+        `;
+
+        const songActionsDiv = document.createElement('div');
+        songActionsDiv.className = 'song-actions';
+
+        // Select button
+        const selectBtn = document.createElement('button');
+        selectBtn.className = `select-btn ${selectedSongId === song.id ? 'selected' : ''}`;
+        selectBtn.textContent = selectedSongId === song.id ? '✓ Selected' : 'Select';
+        selectBtn.onclick = () => selectSong(song.id);
+
+        songActionsDiv.appendChild(selectBtn);
+
+        // Delete button - FIXED: Only show for uploaded songs when user is admin
+        if (song.type === 'uploaded' && isAdmin) {
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.textContent = '🗑️';
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSong(song.id, song.title);
+          };
+          songActionsDiv.appendChild(deleteBtn);
+        }
+
+        songItem.appendChild(songInfoDiv);
+        songItem.appendChild(songActionsDiv);
+        songList.appendChild(songItem);
+      });
+    }
+
+    // Make selectSong global function
+    window.selectSong = function(songId) {
+      if (!isAdmin) return;
+      
+      selectedSongId = songId;
+      const song = songs.find(s => s.id === songId);
+      if (!song) return;
+
+      // Update local display
+      songTitle.textContent = song.title;
+      songArtist.textContent = song.artist;
+      audio.src = song.url;
+      
+      // Reset timeline
+      audio.currentTime = 0;
+      lastSyncedTime = 0;
+      
+      // Notify server and other clients
+      socket.emit("songChange", {
+        title: song.title,
+        artist: song.artist,
+        url: song.url,
+        audioTime: 0
+      });
+
+      updateSongLibrary();
+      statusText.textContent = `🎵 Selected: ${song.title} by ${song.artist}`;
+    };
+
+    // DELETE SONG FUNCTIONALITY - COMPLETELY FIXED
+    function deleteSong(songId, songTitle) {
+      console.log('🗑️ Delete song called:', songId, songTitle, 'Admin:', isAdmin);
+      
+      if (!isAdmin) {
+        statusText.textContent = '❌ Only admin can delete songs';
+        return;
+      }
+
+      songToDelete = songId;
+      deleteTitle.textContent = songTitle;
+      deleteModal.style.display = 'block';
+      console.log('🗑️ Delete modal opened for:', songTitle);
+    }
+
+    // Make delete functions global
+    window.deleteSong = deleteSong;
+
+    window.cancelDelete = function() {
+      console.log('🗑️ Delete cancelled');
+      deleteModal.style.display = 'none';
+      songToDelete = null;
+    };
+
+    window.confirmDelete = async function() {
+      if (!songToDelete) {
+        console.log('🗑️ No song to delete');
+        return;
+      }
+
+      console.log('🗑️ Confirming delete for song ID:', songToDelete);
+
+      try {
+        statusText.textContent = '🗑️ Deleting song...';
+        
+        const response = await fetch(`/api/songs/${songToDelete}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('🗑️ Delete response status:', response.status);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('🗑️ Delete result:', result);
+          
+          statusText.textContent = '✅ Song deleted successfully!';
+          
+          // Remove from local songs array
+          songs = songs.filter(song => song.id !== songToDelete);
+          
+          // If we deleted the currently selected song, reset selection
+          if (selectedSongId === songToDelete) {
+            selectedSongId = null;
+            songTitle.textContent = 'Select a song to get started';
+            songArtist.textContent = 'Harmony Sync';
+            audio.src = '';
+            
+            // Notify other clients
+            socket.emit("songChange", {
+              title: 'Select a song to get started',
+              artist: 'Harmony Sync',
+              url: null,
+              audioTime: 0
+            });
+          }
+          
+          // Update the song library display
+          updateSongLibrary();
+          
+        } else {
+          const error = await response.json();
+          console.error('🗑️ Delete failed:', error);
+          statusText.textContent = `❌ Delete failed: ${error.error}`;
+        }
+      } catch (error) {
+        console.error('🗑️ Delete error:', error);
+        statusText.textContent = '❌ Delete failed: Network error';
+      }
+
+      deleteModal.style.display = 'none';
+      songToDelete = null;
+    };
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target === deleteModal) {
+        deleteModal.style.display = 'none';
+        songToDelete = null;
+      }
+    };
+
+    // File upload
+    uploadBtn.onclick = async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a file first');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('songFile', file);
+      formData.append('title', prompt('Song title:') || file.name);
+      formData.append('artist', prompt('Artist name:') || 'Unknown Artist');
+
+      try {
+        statusText.textContent = '📤 Uploading song...';
+        
+        const response = await fetch('/upload-song', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          statusText.textContent = '✅ Song uploaded successfully!';
+          fileInput.value = '';
+          
+          // Add to local songs array
+          songs.push(result.song);
+          updateSongLibrary();
+          
+        } else {
+          const error = await response.json();
+          statusText.textContent = `❌ Upload failed: ${error.error}`;
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        statusText.textContent = '❌ Upload error: Network error';
+      }
+    };
+
+    // Search event listeners
+    if (searchBtn && searchInput) {
+      searchBtn.onclick = () => searchMusic(searchInput.value);
+      searchInput.onkeypress = (e) => {
+        if (e.key === 'Enter') searchMusic(searchInput.value);
+      };
+    }
+
+    // Volume control
+    volumeSlider.oninput = (e) => {
+      audio.volume = e.target.value;
+    };
+
+    // PLAY BUTTON - Fixed to work with sync
+    playBtn.onclick = async () => {
+      if (!isAdmin) return;
+      
+      const localNow = getHighPrecisionTime();
+      const serverNow = localNow + timeOffset;
+      const networkCompensation = Math.max(avgRTT * 0.8, 20);
+      const playAtServer = serverNow + networkCompensation;
+      const currentTime = audio.currentTime;
+
+      console.log(`🚀 Admin triggering synchronized play at ${formatTime(currentTime)}`);
+
+      socket.emit("ultraPlayAt", {
+        serverTimestamp: playAtServer,
+        audioTime: currentTime,
+      });
+
+      // Play locally with same timing
+      await scheduleUltraLowLatencyPlayback(playAtServer, currentTime, false);
+      isPlaying = true;
+    };
+
+    // PAUSE BUTTON - Fixed to work properly
+    pauseBtn.onclick = () => {
+      if (!isAdmin) return;
+      
+      const currentTime = audio.currentTime;
+      
+      console.log(`⏸️ Admin pausing all devices at ${formatTime(currentTime)}`);
+      
+      // Pause locally first
+      audio.pause();
+      disc.classList.remove('playing');
+      isPlaying = false;
+      
+      // Send pause command with current position
+      socket.emit("ultraPause", { 
+        audioTime: currentTime 
+      });
+      
+      statusText.textContent = `⏸️ Paused at ${formatTime(currentTime)} on all devices`;
+    };
+
+    // FORCE TIMELINE SYNC - The main feature!
+    syncBtn.onclick = () => {
+      if (!isAdmin) return;
+      
+      isSyncing = true;
+      const currentTime = audio.currentTime;
+      
+      console.log(`🎯 FORCE SYNC: Setting all devices to ${formatTime(currentTime)}`);
+      
+      // Pause locally first
+      audio.pause();
+      disc.classList.remove('playing');
+      isPlaying = false;
+      
+      // Send force sync command
+      socket.emit("forceTimelineSync", {
+        audioTime: currentTime,
+        pauseFirst: true
+      });
+      
+      statusText.textContent = `🎯 All devices synced to ${formatTime(currentTime)} - Ready to play!`;
+      
+      // Visual feedback
+      syncBtn.textContent = '✅ Perfect Sync!';
+      syncBtn.style.background = 'linear-gradient(135deg, #00ff88, #4ecdc4)';
+      syncBtn.style.animation = 'none';
+      
+      setTimeout(() => {
+        syncBtn.textContent = '🎯 Force Timeline Sync';
+        syncBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+        isSyncing = false;
+      }, 2000);
+    };
+
+    // Socket event handlers
+    socket.on('connect', () => {
+      console.log("🔗 Connected to server");
+      connectionStatus.innerHTML = '<span class="connected">🟢 Connected</span>';
+      statusText.textContent = '🎵 Connected to Harmony Sync!';
+      
+      // Start synchronization
+      performPrecisionSync();
+      setInterval(performPrecisionSync, 2000);
+    });
+
+    socket.on('disconnect', () => {
+      console.log("❌ Disconnected from server");
+      connectionStatus.innerHTML = '<span class="disconnected">🔴 Disconnected</span>';
+      statusText.textContent = '❌ Disconnected from server';
+      syncStatus.textContent = '❌ Disconnected';
+      syncStatus.className = 'sync-poor';
+    });
+
+    socket.on("youAreAdmin", () => {
+      console.log('👑 You are now admin!');
+      isAdmin = true;
+      playBtn.style.display = "inline-block";
+      pauseBtn.style.display = "inline-block";
+      syncBtn.style.display = "inline-block";
+      songLibrary.style.display = "block";
+      fileUpload.style.display = "block";
+      musicSearch.style.display = "block"; // Show search for admin
+      roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
+      roleBadge.style.display = "block";
+      statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+      
+      // Update song library to show delete buttons
+      updateSongLibrary();
+    });
+
+    socket.on("youAreNotAdmin", () => {
+      console.log('👤 You are a regular user');
+      isAdmin = false;
+      playBtn.style.display = "none";
+      pauseBtn.style.display = "none";
+      songLibrary.style.display = "none";
+      fileUpload.style.display = "none";
+      syncBtn.style.display = "none";
+      musicSearch.style.display = "none"; // Hide search for non-admin
+      roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Timeline auto-syncs!</div>';
+      roleBadge.style.display = "block";
+      statusText.textContent = "🎧 Timeline will auto-sync when admin uses Force Sync!";
+    });
+
+    socket.on("songsUpdated", (songData) => {
+      console.log('🎵 Songs updated from server:', songData.length, 'songs');
+      songs = songData;
+      updateSongLibrary();
+    });
+
+    socket.on("songChange", (songData) => {
+      songTitle.textContent = songData.title;
+      songArtist.textContent = songData.artist;
+      if (songData.url) {
+        audio.src = songData.url;
+        // Set to synced position if provided
+        if (songData.audioTime !== undefined) {
+          audio.currentTime = songData.audioTime;
+          lastSyncedTime = songData.audioTime;
+        }
+      }
+      console.log(`🎵 Song changed: ${songData.title} by ${songData.artist}`);
+    });
+
+    // FORCE TIMELINE SYNC - Received from admin
+    socket.on("forceTimelineSync", ({ audioTime, pauseFirst }) => {
+      if (isAdmin) return; // Admin already handled it locally
+      
+      console.log(`🎯 RECEIVED FORCE SYNC: Setting timeline to ${formatTime(audioTime)}`);
+      
+      // Pause first
+      if (pauseFirst) {
+        audio.pause();
+        disc.classList.remove('playing');
+        isPlaying = false;
+      }
+      
+      // Set exact timeline position with precision
+      setTimeout(() => {
+        audio.currentTime = audioTime;
+        lastSyncedTime = audioTime;
+        updateTimelineDisplay();
+      }, 10); // Small delay to ensure audio is ready
+      
+      statusText.textContent = `🎯 Timeline synced to ${formatTime(audioTime)} by admin!`;
+      
+      // Visual feedback for non-admin users
+      timelineInfo.style.color = '#ffd700';
+      timelineInfo.style.fontWeight = 'bold';
+      timelineInfo.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8)';
+      
+      setTimeout(() => {
+        timelineInfo.style.color = '#4ecdc4';
+        timelineInfo.style.fontWeight = 'normal';
+        timelineInfo.style.textShadow = 'none';
+      }, 3000);
+    });
+
+    socket.on("ultraPlayAt", async ({ serverTimestamp, audioTime }) => {
+      if (!isAdmin) { // Only non-admins receive this
+        console.log(`🎵 Received play command at ${formatTime(audioTime)}`);
+        await scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime, true);
+        isPlaying = true;
+      }
+    });
+
+    socket.on("ultraPause", ({ audioTime }) => {
+      if (!isAdmin) { // Only non-admins receive this  
+        console.log(`⏸️ Received pause command at ${formatTime(audioTime || audio.currentTime)}`);
+        
+        audio.pause();
+        disc.classList.remove('playing');
+        isPlaying = false;
+        
+        // Sync timeline position if provided
+        if (audioTime !== undefined) {
+          setTimeout(() => {
+            audio.currentTime = audioTime;
+            lastSyncedTime = audioTime;
+            updateTimelineDisplay();
+          }, 10);
+        }
+      }
+    });
+
+    // User count updates
+    socket.on("userCount", (count) => {
+      connectedUsers = count;
+      userCount.textContent = count;
+    });
+
+    // LEGACY EVENT HANDLERS (for compatibility)
+    socket.on("playAt", ({ serverTimestamp, audioTime }) => {
+      if (!isAdmin) {
+        scheduleUltraLowLatencyPlayback(serverTimestamp, audioTime, true);
+      }
+    });
+
+    socket.on("pause", () => {
+      if (!isAdmin) {
+        audio.pause();
+        disc.classList.remove('playing');
+        isPlaying = false;
+      }
+    });
+
+    // Audio event listeners
+    audio.addEventListener('play', () => {
+      disc.classList.add('playing');
+      isPlaying = true;
+    });
+
+    audio.addEventListener('pause', () => {
+      disc.classList.remove('playing');
+      isPlaying = false;
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      updateTimelineDisplay();
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      updateTimelineDisplay();
+    });
+
+    audio.addEventListener('canplaythrough', () => {
+      console.log("✅ Audio ready for perfect sync playback");
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      statusText.textContent = '⚠️ Error loading audio file';
+    });
+
+    // Detect when admin manually seeks (drags timeline)
+    audio.addEventListener('seeked', () => {
+      if (isAdmin && !isSyncing) {
+        const newTime = audio.currentTime;
+        console.log(`🎯 Admin manually seeked to: ${formatTime(newTime)}`);
+        statusText.textContent = `🎯 Dragged to ${formatTime(newTime)} - Click Force Sync to sync all devices!`;
+        
+        // Highlight the sync button with pulse animation
+        syncBtn.style.animation = 'pulse 1.5s infinite';
+        syncBtn.textContent = '🔥 SYNC NOW!';
+      }
+    });
+
+    // Stop pulse animation when sync is used
+    syncBtn.addEventListener('click', () => {
+      syncBtn.style.animation = 'none';
+    });
+
+    // Keyboard shortcuts for admin
+    document.addEventListener('keydown', (e) => {
+      if (!isAdmin) return;
+      
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        if (audio.paused || !isPlaying) {
+          playBtn.click();
+        } else {
+          pauseBtn.click();
+        }
+      } else if (e.code === 'KeyS' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        syncBtn.click();
+      }
+    });
+
+    // Set default audio properties
+    audio.volume = volumeSlider.value;
+    audio.preload = "auto";
+
+    // Continuous timeline monitoring
+    setInterval(() => {
+      if (isPlaying && !audio.paused) {
+        updateTimelineDisplay();
+      }
+    }, 100);
+
+    // Initialize
+    console.log("🎵 Zero-Delay Harmony Sync Client Initialized");
+    console.log("🎯 Perfect timeline synchronization enabled");
+    console.log("🎮 Admin controls: Drag timeline → Force Sync → Play");
+    console.log("🔍 Music search functionality enabled");
+    console.log("🗑️ DELETE functionality COMPLETELY FIXED - buttons now appear!");
+  </script>
+</body>
+</html>
