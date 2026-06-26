@@ -619,6 +619,11 @@
   </div>
 
   <div class="container">
+    <!-- Claim Admin Button -->
+    <button id="claimAdminBtn" class="control-btn secondary" style="margin-bottom: 10px; display: none;">
+      👑 Claim Admin
+    </button>
+
     <!-- Role badge -->
     <div id="roleBadge" style="display: none;"></div>
 
@@ -717,6 +722,7 @@
     const songList = document.getElementById("songList");
     const fileUpload = document.getElementById("fileUpload");
     const fileInput = document.getElementById("fileInput");
+    const claimAdminBtn = document.getElementById("claimAdminBtn");
     const uploadBtn = document.getElementById("uploadBtn");
     const deleteModal = document.getElementById("deleteModal");
     const deleteTitle = document.getElementById("deleteTitle");
@@ -1249,14 +1255,32 @@
     };
 
     // Socket event handlers
+    // Claim Admin button click handler
+    claimAdminBtn.addEventListener('click', () => {
+      socket.emit('claimAdmin');
+    });
+
     socket.on('connect', () => {
       console.log("🔗 Connected to server");
       connectionStatus.innerHTML = '<span class="connected">🟢 Connected</span>';
       statusText.textContent = '🎵 Connected to Harmony Sync!';
       
+      // Ask server if there's an admin yet
+      socket.emit('checkAdminStatus');
+      
       // Start synchronization
       performPrecisionSync();
       setInterval(performPrecisionSync, 2000);
+    });
+
+    // New event: tell client if admin exists
+    socket.on('adminStatus', ({ hasAdmin }) => {
+      console.log("👑 Admin status:", hasAdmin);
+      if (!isAdmin && !hasAdmin) {
+        claimAdminBtn.style.display = 'inline-block';
+      } else {
+        claimAdminBtn.style.display = 'none';
+      }
     });
 
     socket.on('disconnect', () => {
@@ -1267,35 +1291,59 @@
       syncStatus.className = 'sync-poor';
     });
 
-    socket.on("youAreAdmin", () => {
-      console.log('👑 You are now admin!');
-      isAdmin = true;
-      playBtn.style.display = "inline-block";
-      pauseBtn.style.display = "inline-block";
-      syncBtn.style.display = "inline-block";
-      songLibrary.style.display = "block";
-      fileUpload.style.display = "block";
-
-      roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
-      roleBadge.style.display = "block";
-      statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+    socket.on("roleAssigned", ({ isAdmin: isAdminNow }) => {
+      console.log('🎭 Role assigned:', isAdminNow ? 'ADMIN' : 'LISTENER');
+      isAdmin = isAdminNow;
       
-      // Update song library to show delete buttons
-      updateSongLibrary();
+      if (isAdmin) {
+        claimAdminBtn.style.display = 'none';
+        playBtn.style.display = "inline-block";
+        pauseBtn.style.display = "inline-block";
+        syncBtn.style.display = "inline-block";
+        songLibrary.style.display = "block";
+        fileUpload.style.display = "block";
+
+        roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
+        roleBadge.style.display = "block";
+        statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+        updateSongLibrary();
+      } else {
+        playBtn.style.display = "none";
+        pauseBtn.style.display = "none";
+        songLibrary.style.display = "none";
+        fileUpload.style.display = "none";
+        syncBtn.style.display = "none";
+        roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Timeline auto-syncs!</div>';
+        roleBadge.style.display = "block";
+        statusText.textContent = "🎧 Timeline will auto-sync when admin uses Force Sync!";
+      }
     });
 
-    socket.on("youAreNotAdmin", () => {
-      console.log('👤 You are a regular user');
-      isAdmin = false;
-      playBtn.style.display = "none";
-      pauseBtn.style.display = "none";
-      songLibrary.style.display = "none";
-      fileUpload.style.display = "none";
-      syncBtn.style.display = "none";
-      musicSearch.style.display = "none"; // Hide search for non-admin
-      roleBadge.innerHTML = '<div class="user-badge">🎧 LISTENER - Timeline auto-syncs!</div>';
-      roleBadge.style.display = "block";
-      statusText.textContent = "🎧 Timeline will auto-sync when admin uses Force Sync!";
+    socket.on("initialState", ({ isAdmin: isAdminNow, songs: serverSongs, currentSongId: currentId, isPlaying: playing }) => {
+      console.log('📦 Initial state received');
+      isAdmin = isAdminNow;
+      songs = serverSongs;
+      if (currentId) {
+        const song = songs.find(s => s.id === currentId);
+        if (song) {
+          songTitle.textContent = song.title;
+          songArtist.textContent = song.artist;
+          audio.src = song.url;
+        }
+      }
+      if (isAdmin) {
+        claimAdminBtn.style.display = 'none';
+        playBtn.style.display = "inline-block";
+        pauseBtn.style.display = "inline-block";
+        syncBtn.style.display = "inline-block";
+        songLibrary.style.display = "block";
+        fileUpload.style.display = "block";
+
+        roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
+        roleBadge.style.display = "block";
+        statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
+      }
+      updateSongLibrary();
     });
 
     socket.on("songsUpdated", (songData) => {
