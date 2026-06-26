@@ -5,7 +5,14 @@ const { performance } = require("perf_hooks");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
-const axios = require('axios'); // Add this line
+const cloudinary = require("cloudinary").v2;
+
+// Configure Cloudinary (REPLACE THESE WITH YOUR OWN VALUES FROM CLOUDINARY DASHBOARD!)
+cloudinary.config({
+  cloud_name: "dhwjrkntm",
+  api_key: "325845527366894",
+  api_secret: "FyjJmKDVft6f3XOdoVmH7eqLG2g"
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -23,40 +30,93 @@ const io = new Server(server, {
   allowEIO3: false
 });
 
-// MUSIC API INTEGRATION
-async function searchSongs(query, limit = 20) {
-  try {
-    // JioSaavn API (100% FREE - No key needed)
-    const response = await axios.get('https://jiosaavn-api-privatecvc.vercel.app/api/search/songs', {
-      params: { query, limit },
-      timeout: 5000
-    });
-
-    if (response.data?.data?.results) {
-      return response.data.data.results.map(song => ({
-        id: `api_${song.id}`,
-        title: song.name || song.title,
-        artist: song.primaryArtists || 'Unknown Artist',
-        duration: formatTime(song.duration || 0),
-        url: song.downloadUrl?.[4]?.link || song.media_preview_url,
-        type: 'api',
-        source: 'JioSaavn'
-      }));
-    }
-    return [];
-  } catch (error) {
-    console.error('🎵 Search failed:', error.message);
-    return [];
+// In-memory song list (free, no storage needed)
+let songsDatabase = [
+  {
+    id: 1,
+    title: "Lo-Fi Chill Vibes",
+    artist: "Ambient Collective",
+    duration: "3:45",
+    url: "https://media.vocaroo.com/mp3/13vvld8kQ12W",
+    type: "external"
+  },
+  {
+    id: 2,
+    title: "Sunset Dreams", 
+    artist: "Chillwave Studio",
+    duration: "4:12",
+    url: "https://media.vocaroo.com/mp3/1n1E0T6Aszur",
+    type: "external"
+  },
+  {
+    id: 3,
+    title: "Ocean Breeze",
+    artist: "Nature Sounds Co",
+    duration: "5:30", 
+    url: "https://file-examples.com/storage/fe96ac13b66ebe89c2b9094/2017/11/file_example_MP3_700KB.mp3",
+    type: "external"
   }
+];
+
+// Helper function to format duration
+function formatDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 // Add search endpoint
 app.get('/api/search', async (req, res) => {
   const { q } = req.query;
   if (!q) return res.status(400).json({ error: 'Query required' });
-  
+
   const results = await searchSongs(q);
   res.json({ success: true, results });
+});
+
+// YouTube audio extraction endpoint
+app.get('/api/youtube-audio/:videoId', async (req, res) => {
+  const { videoId } = req.params;
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  
+  try {
+    console.log(`🎵 Extracting audio for: ${videoId}`);
+    
+    // Validate the video URL
+    const info = await ytdl.getInfo(videoUrl);
+    
+    // Get the best audio-only format
+    const audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+    const format = ytdl.chooseFormat(audioFormats, { quality: 'highestaudio' });
+    
+    if (!format) {
+      return res.status(404).json({ error: 'No audio format found' });
+    }
+    
+    // Set headers for audio streaming
+    res.setHeader('Content-Type', 'audio/webm');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    
+    // Stream the audio directly
+    const stream = ytdl(videoUrl, {
+      format: format,
+      highWaterMark: 1 << 25 // 32MB buffer for smooth streaming
+    });
+    
+    stream.pipe(res);
+    
+    stream.on('error', (err) => {
+      console.error('Streaming error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Streaming failed' });
+      }
+    });
+    
+  } catch (error) {
+    console.error('Audio extraction error:', error);
+    res.status(500).json({ error: 'Failed to extract audio' });
+  }
 });
 
 // Create uploads directory if it doesn't exist
@@ -65,7 +125,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configure multer for file uploads
+// Configure multer for file uploads (use disk storage temporarily)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -110,33 +170,7 @@ let globalSyncState = {
   lastSyncTimestamp: 0
 };
 
-// In-memory songs database
-let songsDatabase = [
-  {
-    id: 1,
-    title: "Lo-Fi Chill Vibes",
-    artist: "Ambient Collective",
-    duration: "3:45",
-    url: "https://media.vocaroo.com/mp3/13vvld8kQ12W",
-    type: "external"
-  },
-  {
-    id: 2,
-    title: "Sunset Dreams", 
-    artist: "Chillwave Studio",
-    duration: "4:12",
-    url: "https://media.vocaroo.com/mp3/1n1E0T6Aszur",
-    type: "external"
-  },
-  {
-    id: 3,
-    title: "Ocean Breeze",
-    artist: "Nature Sounds Co",
-    duration: "5:30", 
-    url: "https://file-examples.com/storage/fe96ac13b66ebe89c2b9094/2017/11/file_example_MP3_700KB.mp3",
-    type: "external"
-  }
-];
+
 
 // Performance tracking
 let performanceMetrics = {
@@ -175,10 +209,15 @@ function formatTime(seconds) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// File upload endpoint
+// File upload endpoint (TEMP: LOCAL STORAGE FOR TESTING SYNC)
 app.post('/upload-song', upload.single('songFile'), (req, res) => {
+  console.log('📤 Received upload request');
+  console.log('Request file:', req.file);
+  console.log('Request body:', req.body);
+  
   try {
     if (!req.file) {
+      console.error('❌ No file in request');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -196,7 +235,9 @@ app.post('/upload-song', upload.single('songFile'), (req, res) => {
     };
 
     songsDatabase.push(newSong);
+    saveSongs(); // Save to file
     console.log(`🎵 New song uploaded: ${newSong.title} by ${newSong.artist}`);
+    console.log('🎵 Song URL:', newSong.url);
 
     io.emit('songsUpdated', songsDatabase);
     res.json({ success: true, song: newSong, message: 'Song uploaded successfully!' });
@@ -211,7 +252,18 @@ app.get('/api/songs', (req, res) => {
   res.json(songsDatabase);
 });
 
-app.delete('/api/songs/:id', (req, res) => {
+// Add song endpoint (for direct Cloudinary uploads from client)
+app.post('/add-song', express.json(), (req, res) => {
+  const newSong = req.body;
+  console.log('🎵 Adding new song from client:', newSong.title);
+  
+  songsDatabase.push(newSong);
+  io.emit('songsUpdated', songsDatabase);
+  
+  res.json({ success: true, song: newSong });
+});
+
+app.delete('/api/songs/:id', async (req, res) => {
   const songId = parseInt(req.params.id);
   const songIndex = songsDatabase.findIndex(song => song.id === songId);
   
@@ -221,11 +273,13 @@ app.delete('/api/songs/:id', (req, res) => {
 
   const song = songsDatabase[songIndex];
   
-  if (song.type === 'uploaded' && song.filename) {
-    const filePath = path.join(uploadsDir, song.filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log(`🗑️ Deleted file: ${song.filename}`);
+  // Delete from Cloudinary if we have a publicId
+  if (song.type === 'uploaded' && song.publicId) {
+    try {
+      await cloudinary.uploader.destroy(song.publicId, { resource_type: "video" });
+      console.log(`🗑️ Deleted from Cloudinary: ${song.publicId}`);
+    } catch (e) {
+      console.error("⚠️ Couldn't delete from Cloudinary:", e);
     }
   }
 
@@ -493,14 +547,13 @@ server.listen(PORT, () => {
   console.log(`   • Zero-delay playback sync`);
   console.log(`   • Perfect timeline position sync`);
   console.log(`   • Force sync any timeline position`);
-  console.log(`   • Music search API integration`);
+  console.log(`   • YouTube music search & streaming`);
   console.log(`   • WebSocket-only, TCP_NODELAY enabled`);
   console.log(`📁 Upload directory: ${uploadsDir}`);
   console.log(`\n💡 Optimization: Run with 'node --expose-gc --max-old-space-size=512 index.js'`);
   console.log(`🎮 Admin Controls:`);
-  console.log(`   • Search songs from JioSaavn`);
+  console.log(`   • Search songs from YouTube`);
   console.log(`   • Drag timeline → Force Sync = Perfect position sync`);
   console.log(`   • Play = All devices start simultaneously`);
   console.log(`   • Pause = All devices pause at exact same position`);
-
 });

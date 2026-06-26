@@ -631,15 +631,7 @@
       <div id="songList"></div>
     </div>
 
-    <!-- Music Search (Admin only) -->
-    <div id="musicSearch" class="music-search" style="display: none;">
-      <h3 style="color: #4ecdc4; margin-bottom: 15px;">🔍 Search Songs</h3>
-      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search songs..." />
-        <button id="searchBtn" class="search-btn">Search</button>
-      </div>
-      <div id="searchResults" style="max-height: 200px; overflow-y: auto;"></div>
-    </div>
+
 
     <!-- Now Playing -->
     <div class="now-playing">
@@ -729,9 +721,7 @@
     const deleteModal = document.getElementById("deleteModal");
     const deleteTitle = document.getElementById("deleteTitle");
     const musicSearch = document.getElementById("musicSearch");
-    const searchInput = document.getElementById("searchInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const searchResults = document.getElementById("searchResults");
+
 
     // State variables
     let isAdmin = false;
@@ -747,7 +737,6 @@
     let isSyncing = false;
     let isPlaying = false;
     let songToDelete = null;
-    let searchResultsData = [];
 
     // High precision timing
     const getHighPrecisionTime = () => {
@@ -907,64 +896,7 @@
       }
     }
 
-    // MUSIC SEARCH FUNCTIONALITY
-    async function searchMusic(query) {
-      if (!query.trim()) return;
-      
-      searchBtn.textContent = 'Searching...';
-      searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #4ecdc4;">🎵 Searching...</div>';
-      
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        
-        if (data.success && data.results.length > 0) {
-          displaySearchResults(data.results);
-        } else {
-          searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No songs found</div>';
-        }
-      } catch (error) {
-        searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff6b6b;">Search failed</div>';
-      }
-      
-      searchBtn.textContent = 'Search';
-    }
 
-    function displaySearchResults(results) {
-      searchResults.innerHTML = results.map(song => `
-        <div class="search-result" onclick="selectApiSong('${song.id}')">
-          <div>
-            <div style="color: #ff6b6b; font-weight: bold;">${song.title}</div>
-            <div style="color: #b0b0b0; font-size: 0.9rem;">${song.artist}</div>
-          </div>
-          <div style="color: #4ecdc4; font-size: 0.8rem;">${song.duration}</div>
-        </div>
-      `).join('');
-      searchResultsData = results;
-    }
-
-    function selectApiSong(songId) {
-      if (!isAdmin) return;
-      
-      const song = searchResultsData.find(s => s.id === songId);
-      if (!song) return;
-      
-      // Update display
-      songTitle.textContent = song.title;
-      songArtist.textContent = song.artist;
-      audio.src = song.url;
-      audio.currentTime = 0;
-      
-      // Notify other clients
-      socket.emit("songChange", {
-        title: song.title,
-        artist: song.artist,
-        url: song.url,
-        audioTime: 0
-      });
-      
-      statusText.textContent = `🎵 Selected: ${song.title}`;
-    }
 
     // Song library management - FIXED DELETE FUNCTIONALITY
     function updateSongLibrary() {
@@ -1026,16 +958,28 @@
 
     // Make selectSong global function
     window.selectSong = function(songId) {
-      if (!isAdmin) return;
+      console.log('🎵 selectSong called with songId:', songId, 'type:', typeof songId);
+      console.log('🎵 Available songs:', songs);
+      
+      if (!isAdmin) {
+        console.log('⚠️ Not admin, cannot select song');
+        return;
+      }
       
       selectedSongId = songId;
-      const song = songs.find(s => s.id === songId);
-      if (!song) return;
+      const song = songs.find(s => s.id === songId || String(s.id) === String(songId));
+      console.log('🎵 Found song:', song);
+      
+      if (!song) {
+        console.error('❌ Song not found!');
+        return;
+      }
 
       // Update local display
       songTitle.textContent = song.title;
       songArtist.textContent = song.artist;
       audio.src = song.url;
+      console.log('🎵 Setting audio.src to:', song.url);
       
       // Reset timeline
       audio.currentTime = 0;
@@ -1147,53 +1091,80 @@
       }
     };
 
-    // File upload
+    // REPLACE WITH YOUR CLOUDINARY CLOUD NAME!
+    const CLOUDINARY_CLOUD_NAME = "dhwjrkntm"; 
+    const CLOUDINARY_UPLOAD_PRESET = "music-sync-unsigned";
+
+    // File upload (DIRECT TO CLOUDINARY, FAST, FREE)
     uploadBtn.onclick = async () => {
+      console.log('📤 Upload button clicked');
       const file = fileInput.files[0];
       if (!file) {
-        alert('Please select a file first');
+        statusText.textContent = '⚠️ Please select a file first';
         return;
       }
 
-      const formData = new FormData();
-      formData.append('songFile', file);
-      formData.append('title', prompt('Song title:') || file.name);
-      formData.append('artist', prompt('Artist name:') || 'Unknown Artist');
+      console.log('File selected:', file.name, file.size, file.type);
+      statusText.textContent = '📤 Uploading to Cloudinary...';
+
+      // Upload directly to Cloudinary (unsigned)
+      const cloudFormData = new FormData();
+      cloudFormData.append('file', file);
+      cloudFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      cloudFormData.append('resource_type', 'video'); // For audio files
+      cloudFormData.append('folder', 'music-sync-songs');
 
       try {
-        statusText.textContent = '📤 Uploading song...';
-        
-        const response = await fetch('/upload-song', {
+        const cloudResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+          { method: 'POST', body: cloudFormData }
+        );
+
+        if (!cloudResponse.ok) {
+          throw new Error('Cloudinary upload failed');
+        }
+
+        const cloudResult = await cloudResponse.json();
+        console.log('Cloudinary upload success:', cloudResult);
+
+        const title = file.name.replace(/\.[^/.]+$/, "");
+        const newSong = {
+          id: Date.now(),
+          title: title,
+          artist: 'Unknown Artist',
+          duration: 'Unknown',
+          url: cloudResult.secure_url,
+          publicId: cloudResult.public_id,
+          type: 'uploaded',
+          uploadedAt: new Date().toISOString()
+        };
+
+        // Send the new song to the server to add to songs.json
+        const serverResponse = await fetch('/add-song', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSong)
         });
 
-        if (response.ok) {
-          const result = await response.json();
+        if (serverResponse.ok) {
+          const result = await serverResponse.json();
           statusText.textContent = '✅ Song uploaded successfully!';
           fileInput.value = '';
           
-          // Add to local songs array
+          // Update local songs array
           songs.push(result.song);
           updateSongLibrary();
-          
         } else {
-          const error = await response.json();
-          statusText.textContent = `❌ Upload failed: ${error.error}`;
+          throw new Error('Failed to save song to server');
         }
+        
       } catch (error) {
         console.error('Upload error:', error);
-        statusText.textContent = '❌ Upload error: Network error';
+        statusText.textContent = `❌ Upload failed: ${error.message}`;
       }
     };
 
-    // Search event listeners
-    if (searchBtn && searchInput) {
-      searchBtn.onclick = () => searchMusic(searchInput.value);
-      searchInput.onkeypress = (e) => {
-        if (e.key === 'Enter') searchMusic(searchInput.value);
-      };
-    }
+
 
     // Volume control
     volumeSlider.oninput = (e) => {
@@ -1304,7 +1275,7 @@
       syncBtn.style.display = "inline-block";
       songLibrary.style.display = "block";
       fileUpload.style.display = "block";
-      musicSearch.style.display = "block"; // Show search for admin
+
       roleBadge.innerHTML = '<div class="admin-badge">👑 ADMIN - You control timeline sync!</div>';
       roleBadge.style.display = "block";
       statusText.textContent = "👑 Drag timeline & Force Sync for perfect synchronization!";
@@ -1431,11 +1402,13 @@
 
     // Audio event listeners
     audio.addEventListener('play', () => {
+      console.log('🎵 Audio started playing');
       disc.classList.add('playing');
       isPlaying = true;
     });
 
     audio.addEventListener('pause', () => {
+      console.log('⏸️ Audio paused');
       disc.classList.remove('playing');
       isPlaying = false;
     });
@@ -1445,7 +1418,12 @@
     });
 
     audio.addEventListener('loadedmetadata', () => {
+      console.log('✅ Audio metadata loaded! Duration:', audio.duration);
       updateTimelineDisplay();
+    });
+
+    audio.addEventListener('canplay', () => {
+      console.log("✅ Audio can play now!");
     });
 
     audio.addEventListener('canplaythrough', () => {
@@ -1453,8 +1431,19 @@
     });
 
     audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
+      console.error('❌ Audio error:', e);
+      console.error('❌ Audio element error:', audio.error);
+      console.error('❌ Audio src:', audio.src);
       statusText.textContent = '⚠️ Error loading audio file';
+    });
+
+    audio.addEventListener('loadstart', () => {
+      console.log('🎵 Loading audio from:', audio.src);
+      statusText.textContent = '⏳ Loading audio...';
+    });
+
+    audio.addEventListener('loadeddata', () => {
+      console.log('✅ Audio data loaded!');
     });
 
     // Detect when admin manually seeks (drags timeline)
